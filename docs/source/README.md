@@ -1,0 +1,1 @@
+This folder contains source reference files for platform data such as the GEM & ATR team roster.
