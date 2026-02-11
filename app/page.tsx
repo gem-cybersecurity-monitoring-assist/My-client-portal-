@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import LoginPage from "./login/page"
 
-export default async function Home() {
-  redirect("/login")
+export default function Home() {
+  return <LoginPage />
 }
