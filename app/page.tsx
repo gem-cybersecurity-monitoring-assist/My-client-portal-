@@ -1,5 +1,26 @@
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
+import { Loader2 } from "lucide-react"
 
 export default function Home() {
-  redirect("/login")
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isLoading) return
+    if (isAuthenticated) {
+      router.replace("/dashboard")
+    } else {
+      router.replace("/login")
+    }
+  }, [isLoading, isAuthenticated, router])
+
+  return (
+    <div className="flex min-h-dvh items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )
 }

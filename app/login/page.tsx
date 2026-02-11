@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { GlassCard } from "@/components/glass-card"
@@ -18,32 +18,44 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard")
+    }
+  }, [isLoading, isAuthenticated, router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
-    setTimeout(() => {
-      if (login(email, password)) {
-        router.push("/dashboard")
-        setTimeout(() => setLoading(false), 1000)
-      } else {
-        setError("Invalid credentials. Try one of the quick access options below.")
-        setLoading(false)
-      }
-    }, 400)
+    const success = login(email, password)
+    if (success) {
+      router.replace("/dashboard")
+    } else {
+      setError("Invalid credentials. Try one of the quick access options below.")
+      setLoading(false)
+    }
   }
 
   const handleQuickAccess = (item: (typeof quickAccess)[0]) => {
     setLoading(true)
-    if (login(item.email, item.pass)) {
-      router.push(item.route)
-      setTimeout(() => setLoading(false), 1000)
+    const success = login(item.email, item.pass)
+    if (success) {
+      router.replace(item.route)
     } else {
       setLoading(false)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (

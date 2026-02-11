@@ -19,11 +19,11 @@ export function AuthGuard({
   useEffect(() => {
     if (isLoading) return
     if (!isAuthenticated) {
-      router.push("/login")
+      router.replace("/login")
       return
     }
     if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
-      router.push("/dashboard")
+      router.replace("/dashboard")
     }
   }, [isLoading, isAuthenticated, session, requiredRole, router])
 
