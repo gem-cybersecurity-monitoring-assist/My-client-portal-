@@ -28,6 +28,7 @@ export default function LoginPage() {
     setTimeout(() => {
       if (login(email, password)) {
         router.push("/dashboard")
+        setTimeout(() => setLoading(false), 1000)
       } else {
         setError("Invalid credentials. Try one of the quick access options below.")
         setLoading(false)
@@ -36,8 +37,12 @@ export default function LoginPage() {
   }
 
   const handleQuickAccess = (item: (typeof quickAccess)[0]) => {
+    setLoading(true)
     if (login(item.email, item.pass)) {
       router.push(item.route)
+      setTimeout(() => setLoading(false), 1000)
+    } else {
+      setLoading(false)
     }
   }
 

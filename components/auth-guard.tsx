@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { Loader2 } from "lucide-react"
 import type { UserRole } from "@/lib/data"
 
 export function AuthGuard({
@@ -12,10 +13,11 @@ export function AuthGuard({
   children: React.ReactNode
   requiredRole?: UserRole
 }) {
-  const { session, isAuthenticated } = useAuth()
+  const { session, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
+    if (isLoading) return
     if (!isAuthenticated) {
       router.push("/login")
       return
@@ -23,7 +25,15 @@ export function AuthGuard({
     if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
       router.push("/dashboard")
     }
-  }, [isAuthenticated, session, requiredRole, router])
+  }, [isLoading, isAuthenticated, session, requiredRole, router])
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   if (!isAuthenticated) return null
   if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") return null
