@@ -50,7 +50,10 @@ export default function LoginPage() {
     }
   }
 
+  console.log("[v0] LoginPage render: isLoading =", isLoading, "isAuthenticated =", isAuthenticated, "loading =", loading)
+
   if (isLoading) {
+    console.log("[v0] LoginPage: showing hydration spinner")
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -58,6 +61,7 @@ export default function LoginPage() {
     )
   }
 
+  console.log("[v0] LoginPage: rendering login form")
   return (
     <div className="flex min-h-dvh items-center justify-center px-4 py-12">
       <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }}>

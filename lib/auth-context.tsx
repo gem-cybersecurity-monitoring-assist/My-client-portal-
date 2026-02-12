@@ -25,7 +25,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    console.log("[v0] AuthProvider: hydrating from localStorage")
     const stored = localStorage.getItem("gem_session")
+    console.log("[v0] AuthProvider: stored session =", stored ? "found" : "null")
     if (stored) {
       try {
         setSession(JSON.parse(stored))
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     setIsLoading(false)
+    console.log("[v0] AuthProvider: hydration complete, isLoading = false")
   }, [])
 
   const login = useCallback((email: string, password: string): boolean => {
