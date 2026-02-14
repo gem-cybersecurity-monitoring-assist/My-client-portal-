@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { Loader2 } from "lucide-react"
 import type { UserRole } from "@/lib/data"
 
@@ -15,28 +15,36 @@ export function AuthGuard({
 }) {
   const { session, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
+  const hasRedirected = useRef(false)
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading || hasRedirected.current) return
     if (!isAuthenticated) {
-      router.replace("/login")
+      hasRedirected.current = true
+      router.replace("/")
       return
     }
     if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
+      hasRedirected.current = true
       router.replace("/dashboard")
     }
   }, [isLoading, isAuthenticated, session, requiredRole, router])
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return (
-      <div className="flex min-h-dvh items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
-  if (!isAuthenticated) return null
-  if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") return null
+  if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return <>{children}</>
 }
