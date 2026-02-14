@@ -22,7 +22,7 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    if (isAuthenticated && session) {
+    if (!isLoading && isAuthenticated && session) {
       const route = session.role === "superadmin" ? "/superadmin"
         : session.role === "admin" ? "/admin"
         : session.role === "team" ? "/team"
@@ -30,7 +30,7 @@ export default function Home() {
         : "/dashboard"
       router.replace(route)
     }
-  }, [isAuthenticated, session, router])
+  }, [isLoading, isAuthenticated, session, router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,9 +55,9 @@ export default function Home() {
     }
   }
 
-  if (isAuthenticated) {
+  if (isLoading || isAuthenticated) {
     return (
-      <div className="flex min-h-dvh items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )

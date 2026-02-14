@@ -21,16 +21,22 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(() => {
-    if (typeof window === "undefined") return null
+  const [session, setSession] = useState<Session | null>(null)
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem("gem_session")
-      return stored ? JSON.parse(stored) : null
+      if (stored) {
+        setSession(JSON.parse(stored))
+      }
     } catch {
-      return null
+      localStorage.removeItem("gem_session")
     }
-  })
-  const isLoading = false
+    setHydrated(true)
+  }, [])
+
+  const isLoading = !hydrated
 
   const login = useCallback((email: string, password: string): boolean => {
     const user = USERS[email]
