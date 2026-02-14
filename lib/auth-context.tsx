@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react"
 import { USERS, type UserRole } from "./data"
 
 type Session = {
@@ -23,15 +23,18 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const initialized = useRef(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem("gem_session")
-    if (stored) {
-      try {
+    if (initialized.current) return
+    initialized.current = true
+    try {
+      const stored = localStorage.getItem("gem_session")
+      if (stored) {
         setSession(JSON.parse(stored))
-      } catch {
-        localStorage.removeItem("gem_session")
       }
+    } catch {
+      localStorage.removeItem("gem_session")
     }
     setIsLoading(false)
   }, [])

@@ -21,8 +21,11 @@ export default function Home() {
   const { login, isAuthenticated, isLoading, session } = useAuth()
   const router = useRouter()
 
+  const [redirecting, setRedirecting] = useState(false)
+
   useEffect(() => {
-    if (!isLoading && isAuthenticated && session) {
+    if (!isLoading && isAuthenticated && session && !redirecting) {
+      setRedirecting(true)
       const route = session.role === "superadmin" ? "/superadmin"
         : session.role === "admin" ? "/admin"
         : session.role === "team" ? "/team"
@@ -30,7 +33,7 @@ export default function Home() {
         : "/dashboard"
       router.replace(route)
     }
-  }, [isLoading, isAuthenticated, session, router])
+  }, [isLoading, isAuthenticated, session, router, redirecting])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
