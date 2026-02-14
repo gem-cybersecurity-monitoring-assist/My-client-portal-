@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useSyncExternalStore, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import { USERS, type UserRole } from "./data"
 
 type Session = {
@@ -20,25 +20,16 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-function getStoredSession(): Session | null {
-  try {
-    const stored = localStorage.getItem("gem_session")
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    localStorage.removeItem("gem_session")
-    return null
-  }
-}
-
-const emptySubscribe = () => () => {}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const initialSession = useSyncExternalStore(
-    emptySubscribe,
-    () => getStoredSession(),
-    () => null
-  )
-  const [session, setSession] = useState<Session | null>(initialSession)
+  const [session, setSession] = useState<Session | null>(() => {
+    if (typeof window === "undefined") return null
+    try {
+      const stored = localStorage.getItem("gem_session")
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
+  })
   const isLoading = false
 
   const login = useCallback((email: string, password: string): boolean => {
