@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react"
+import { createContext, useContext, useState, useSyncExternalStore, useCallback, type ReactNode } from "react"
 import { USERS, type UserRole } from "./data"
 
 type Session = {
@@ -20,55 +20,63 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const initialized = useRef(false)
+function getStoredSession(): Session | null {
+  try {
+    const stored = localStorage.getItem("gem_session")
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    localStorage.removeItem("gem_session")
+    return null
+  }
+}
 
-  useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-    try {
-      const stored = localStorage.getItem("gem_session")
-      if (stored) {
-        setSession(JSON.parse(stored))
-      }
-    } catch {
-      localStorage.removeItem("gem_session")
-    }
-    setIsLoading(false)
-  }, [])
+const emptySubscribe = () => () => {}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const initialSession = useSyncExternalStore(
+    emptySubscribe,
+    () => getStoredSession(),
+    () => null
+  )
+  const [session, setSession] = useState<Session | null>(initialSession)
+  const isLoading = false
 
   const login = useCallback((email: string, password: string): boolean => {
     const user = USERS[email]
-    if (user && user.password === password) {
-      const newSession: Session = {
-        email,
-        role: user.role,
-        name: user.name,
-        loginTime: new Date().toISOString(),
-      }
-      localStorage.setItem("gem_session", JSON.stringify(newSession))
-      setSession(newSession)
-      return true
+    if (!user || user.password !== password) return false
+    const newSession: Session = {
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      loginTime: new Date().toISOString(),
     }
-    return false
+    setSession(newSession)
+    localStorage.setItem("gem_session", JSON.stringify(newSession))
+    return true
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem("gem_session")
     setSession(null)
+    localStorage.removeItem("gem_session")
   }, [])
 
   return (
-    <AuthContext.Provider value={{ session, login, logout, isAuthenticated: !!session, isLoading }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        login,
+        logout,
+        isAuthenticated: !!session,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error("useAuth must be used within AuthProvider")
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider")
+  return ctx
 }
