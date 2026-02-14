@@ -84,7 +84,7 @@ export default function DashboardPage() {
               <div style={{ animation: `fadeIn ${0.3 + i * 0.08}s ease-out` }}>
                 <div className="mb-3 flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                    <portal.icon className="h-4.5 w-4.5 text-primary" />
+                    <portal.icon className="h-5 w-5 text-primary" />
                   </div>
                   <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                     {portal.badge}
