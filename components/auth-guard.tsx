@@ -13,30 +13,34 @@ export function AuthGuard({
   children: React.ReactNode
   requiredRole?: UserRole
 }) {
-  const { session, isAuthenticated, isLoading } = useAuth()
+  const { session, isAuthenticated } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (isLoading) return
     if (!isAuthenticated) {
-      router.replace("/login")
+      router.replace("/")
       return
     }
     if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
       router.replace("/dashboard")
     }
-  }, [isLoading, isAuthenticated, session, requiredRole, router])
+  }, [isAuthenticated, session, requiredRole, router])
 
-  if (isLoading) {
+  if (!isAuthenticated) {
     return (
-      <div className="flex min-h-dvh items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
-  if (!isAuthenticated) return null
-  if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") return null
+  if (requiredRole && session?.role !== requiredRole && session?.role !== "superadmin") {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return <>{children}</>
 }
