@@ -18,8 +18,13 @@ export default function Home() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { login, isAuthenticated, isLoading, session } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated && session) {
@@ -55,7 +60,7 @@ export default function Home() {
     }
   }
 
-  if (isLoading || isAuthenticated) {
+  if (!mounted || isLoading || isAuthenticated) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
