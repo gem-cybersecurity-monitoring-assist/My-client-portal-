@@ -69,8 +69,8 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div className="flex min-h-dvh items-center justify-center px-4 py-12" suppressHydrationWarning>
+      <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }} suppressHydrationWarning>
         <GlassCard hover={false} className="p-6 md:p-8">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
@@ -122,6 +122,7 @@ export default function LoginForm() {
               type="submit"
               disabled={loading}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-secondary font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+              suppressHydrationWarning
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
             </button>
