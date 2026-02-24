@@ -82,7 +82,7 @@ export default function LoginForm() {
             <p className="mt-1.5 text-sm text-muted">Secure Authentication Portal</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm text-muted">
                 Email Address
@@ -95,6 +95,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 w-full rounded-lg border border-glass-border bg-input px-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                suppressHydrationWarning
               />
             </div>
             <div>
@@ -109,6 +110,7 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 w-full rounded-lg border border-glass-border bg-input px-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                suppressHydrationWarning
               />
             </div>
 
