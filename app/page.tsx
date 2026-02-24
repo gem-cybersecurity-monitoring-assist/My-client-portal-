@@ -55,7 +55,7 @@ export default function Home() {
     }
   }
 
-  if (isAuthenticated) {
+  if (isLoading || isAuthenticated) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
