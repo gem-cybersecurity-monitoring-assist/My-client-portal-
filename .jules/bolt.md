@@ -13,3 +13,7 @@
 ## 2026-02-20 - [Login Page Input Responsiveness]
 **Learning:** High-frequency state updates (typing in email/password) on a login page can cause static UI elements (like quick-access buttons) to re-render, leading to input lag on lower-end devices.
 **Action:** Move static button grids into memoized components and ensure their event handlers use `useCallback` with stable dependencies to maintain stable prop references.
+
+## 2026-02-26 - [Terminal Line Memoization & Wrapper Memo Removal]
+**Learning:** Foundational wrapper components like `GlassCard` that primarily receive dynamic `children` props (often inline JSX) should not be wrapped in `React.memo`, as the shallow comparison overhead is wasted on references that change every render. Conversely, large list items in high-frequency update areas (like a terminal log) MUST be memoized to ensure typing responsiveness.
+**Action:** Extract and memoize list items in frequent update zones. Remove `memo` from generic layout wrappers.
