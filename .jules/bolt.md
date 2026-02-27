@@ -17,3 +17,7 @@
 ## 2026-02-26 - [Terminal Line Memoization & Wrapper Memo Removal]
 **Learning:** Foundational wrapper components like `GlassCard` that primarily receive dynamic `children` props (often inline JSX) should not be wrapped in `React.memo`, as the shallow comparison overhead is wasted on references that change every render. Conversely, large list items in high-frequency update areas (like a terminal log) MUST be memoized to ensure typing responsiveness.
 **Action:** Extract and memoize list items in frequent update zones. Remove `memo` from generic layout wrappers.
+
+## 2026-02-27 - [GPU-Accelerated Animations & List Memoization]
+**Learning:** Animating properties like `box-shadow` triggers expensive paint cycles on every frame, which can lag the UI when multiple elements are animating simultaneously. Refactoring these to use `opacity` and `transform` on pseudo-elements offloads the work to the GPU compositor. Additionally, extracting list items into memoized components with stable keys is essential for maintaining performance in data-heavy dashboards.
+**Action:** Use `opacity` and `transform` for high-frequency animations. Always extract and memoize list items in dashboard views to prevent unnecessary re-renders.
