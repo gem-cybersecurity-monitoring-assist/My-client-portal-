@@ -13,7 +13,7 @@ const quickAccess = [
   { label: "Client", email: "client@gem.com", pass: "client123", icon: Briefcase, route: "/client" },
 ]
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -69,9 +69,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }}>
-        <GlassCard hover={false} className="p-6 md:p-8">
+    <div className="flex min-h-dvh items-center justify-center px-4 py-12" suppressHydrationWarning>
+      <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }} suppressHydrationWarning>
+        <GlassCard hover={false} className="p-6 md:p-8" suppressHydrationWarning>
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <Shield className="h-7 w-7 text-primary" />
@@ -152,4 +152,22 @@ export default function LoginPage() {
       </div>
     </div>
   )
+}
+
+export default function LoginPage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return <LoginPageContent />
 }
