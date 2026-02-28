@@ -1,0 +1,105 @@
+------------------------------------------------------------
+
+GEM & ATR — Team Roster (Source File)
+Version: 1.0
+Purpose: Source reference roster for GEM Cybersecurity and Alliance Trust Realty teams.
+Usage: This file is used as a canonical reference for seeding and validating platform team data.
+
+============================================================
+SECTION 1 — METADATA
+============================================================
+
+Generated: 2026-01-05
+Owner: Platform Operations
+Sensitivity: Internal
+Format: Plain Text
+
+============================================================
+SECTION 2 — TEAM DEFINITIONS
+============================================================
+
+TEAM: GEM
+Description: Cybersecurity, Intelligence, Compliance, and Digital Asset Protection.
+
+TEAM: ALLIANCE
+Description: Real Estate, Legal, Investment, Asset Management, and Recovery Services.
+
+============================================================
+SECTION 3 — CORE ROLES
+============================================================
+
+GEM ROLES:
+- Cybersecurity Director
+- Threat Intelligence Analyst
+- Incident Response Lead
+- Security Architect
+- AI Systems Architect
+- Cryptography Specialist
+- Compliance Officer
+- Digital Forensics Analyst
+- Fraud Detection Analyst
+- Network Defense Engineer
+
+ALLIANCE ROLES:
+- Investment Manager
+- Asset Manager
+- Real Estate Broker
+- Property Manager
+- Legal Counsel
+- Compliance & Regulatory Liaison
+- Recovery Specialist
+- Client Portfolio Advisor
+- Financial Operations Manager
+- Contract Administrator
+
+============================================================
+SECTION 4 — TEAM MEMBERS
+============================================================
+
+Format:
+ID | Name | Team | Role | Status | Clearance
+
+------------------------------------------------------------
+GEM TEAM
+------------------------------------------------------------
+
+GEM-001 | John Doe | GEM | Cybersecurity Director | Active | L4
+GEM-002 | Victor Chinemelomu | GEM | Chief Compliance & Intelligence Officer | Active | L5
+GEM-003 | Sophia Martinez | GEM | Director of Financial Recovery Operations | Active | L3
+GEM-004 | Eric Lin | GEM | AI Systems Architect | Active | L4
+GEM-005 | James Carter | GEM | Threat Intelligence Analyst | Active | L2
+GEM-006 | Rachel Adams | GEM | Digital Forensics Analyst | Active | L2
+GEM-007 | Michael Brown | GEM | Network Defense Engineer | Active | L2
+GEM-008 | Olivia Chen | GEM | Cryptography Specialist | Active | L3
+GEM-009 | Daniel White | GEM | Incident Response Lead | Active | L3
+GEM-010 | Laura Green | GEM | Fraud Detection Analyst | Active | L2
+
+------------------------------------------------------------
+ALLIANCE TEAM
+------------------------------------------------------------
+
+ATR-001 | Jane Smith | Alliance | Real Estate Consultant | Active | RE-LIC
+ATR-002 | Angela Robinson | Alliance | Legal & Regulatory Liaison Officer | Active | BAR-221
+ATR-003 | Mark Thompson | Alliance | Investment Manager | Active | FIN-LIC
+ATR-004 | Susan Wright | Alliance | Property Manager | Active | PM-LIC
+ATR-005 | Kevin Lee | Alliance | Asset Manager | Active | FIN-LIC
+ATR-006 | Emily Johnson | Alliance | Recovery Specialist | Active | OPS
+ATR-007 | Robert King | Alliance | Client Portfolio Advisor | Active | FIN-LIC
+ATR-008 | Natalie Perez | Alliance | Financial Operations Manager | Active | FIN
+ATR-009 | Thomas Scott | Alliance | Contract Administrator | Active | OPS
+ATR-010 | Maria Torres | Alliance | Compliance & Regulatory Liaison | Active | BAR-445
+
+============================================================
+SECTION 5 — NOTES
+============================================================
+
+- This roster is a reference dataset and not an authoritative HR system.
+- Actual user records are managed in the production database.
+- This file is intended for:
+  - Seeding demo environments
+  - Validating role mapping
+  - Documentation and audits
+
+------------------------------------------------------------
+End of File
+------------------------------------------------------------

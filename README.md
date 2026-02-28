@@ -1,317 +1,206 @@
-# Agent Evaluation Project: OpenGuardians
+# 🚀 GEM & ATR Digital Command Center - Complete Website
 
-Evaluate your Microsoft Foundry AI agent locally with pytest-powered testing. This project provides a complete evaluation framework for assessing agent quality, performance, and accuracy using built-in and custom evaluators.
+## Live Website - Production Ready
 
-## Overview
+A complete, enterprise-grade multi-tenant SaaS platform with 6 role-based portals, AI agent operations, and real-time analytics.
 
-This evaluation project enables you to:
+-----
 
-- **Run your agent evaluations locally**
-- **Measure quality metrics** such as coherence, relevance, etc
-- **Create custom evaluators** tailored to your specific requirements
-- **Run evaluations in parallel** for faster feedback
-- **Submit results to Microsoft Foundry** for centralized tracking and comparison
+## 📦 What’s Included
 
----
+### ✅ **Core Pages (6)**
 
-## Table of Contents
+1. `index.html` - Main dashboard with portal selection
+1. `login.html` - Authentication with quick demo access
+1. `superadmin.html` - SuperAdmin portal
+1. `admin.html` - Admin portal
+1. `team.html` - Team portal
+1. `client.html` - Client portal
 
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Running Evaluations](#running-evaluations)
-- [Working with Test Data](#working-with-test-data)
-- [Built-in Evaluators](#built-in-evaluators)
-- [Custom Evaluators](#custom-evaluators)
-- [Viewing Results](#viewing-results)
-- [Debugging Evaluators](#debug-evaluators)
-- [Submitting to Microsoft Foundry](#submitting-to-microsoft-foundry)
-- [Troubleshooting](#troubleshooting)
+### ✅ **AI Platform**
 
----
+- `enterprise-ai.html` - Complete AI agent automation system
 
-## Prerequisites
+### ✅ **Assets**
 
-Before you begin, ensure you have the following installed and configured:
+- `assets/css/global.css` - Global styles and components
+- `assets/js/auth.js` - Authentication & session management
+- `assets/js/api.js` - Mock API and data management
 
-| Requirement | Description |
-|-------------|-------------|
-| **Python 3.10+** | Python interpreter |
-| **VS Code** | Visual Studio Code with the [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) |
-| **AI Toolkit** | [AI Toolkit for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-windows-ai-studio.windows-ai-studio) |
-| **Azure CLI** | Installed and authenticated via `az login` |
-| **Azure subscription** | With access to Azure AI services and Microsoft Foundry |
+-----
 
----
+## 🎯 Quick Start
 
-## Quick Start
-
-### Step 1: Set Up Python Environment
-
-1. Use the one-line command below to create Python environment and install dependencies.
-   - Windows
-     ```powershell
-     python -m venv .venv; .\.venv\Scripts\activate; pip install uv; uv pip install -r requirements.txt --prerelease=allow
-     ```
-   - MacOS / Linux
-     ```bash
-     python3 -m venv .venv && source .venv/bin/activate && pip install uv && uv pip install -r requirements.txt --prerelease=allow
-     ```
-2. Select the Python environment in VS Code: Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`), run `Python: Select Interpreter`, and select the new created environment.
-
-### Step 2: Configure Environment Variables
-
-Open the `.env` file and verify your configuration.
-
-### Step 3: Run Your First Evaluation
-
-1. Open the **Testing** panel in VS Code (click the flask icon in the Activity Bar)
-2. Click the ▶️ button next to `test_OpenGuardians.py` to run all tests
-3. View results in the Test Results panel
-
----
-
-## Project Structure
-
-```
-OpenGuardians-eval/
-├── test_OpenGuardians.py    # Main evaluation test file
-├── evaluators.py                  # Custom evaluators definitions (prompt templates and code graders)
-├── data.jsonl                     # Test dataset (queries and expected outputs)
-├── requirements.txt               # Python package dependencies
-├── .env                           # Environment variables (API keys, endpoints)
-├── pytest.ini                     # Pytest configuration (parallelization, caching)
-├── test-results/                  # Local evaluation results (auto-generated)
-└── .vscode/
-    └── settings.json              # VS Code workspace settings for pytest
-```
-
----
-
-## Configuration
-
-### Environment Variables
-
-The `.env` file contains critical configuration for connecting to Azure services:
-
-| Variable | Description |
-|----------|-------------|
-| `FOUNDRY_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint where your agent is hosted |
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint for the judge model |
-| `AZURE_OPENAI_DEPLOYMENT_NAME` | Azure OpenAI deployment name for the judge model |
-
-### Pytest Configuration
-
-The `pytest.ini` file controls test execution behavior:
-
-```ini
-[pytest]
-# Enable parallel execution
-addopts = -n 4
-```
-
-To run tests sequentially instead, modify `addopts` to remove `-n 4`.
-
----
-
-## Running Evaluations
-
-### Using the VS Code Testing Panel
-
-1. **Open Testing Panel**: Click the flask icon in the Activity Bar (left sidebar)
-2. **Discover Tests**: VS Code automatically discovers tests in `test_OpenGuardians.py`
-3. **Run All Tests**: Click ▶️ next to the test file name
-4. **Run Single Test**: Click ▶️ next to an individual test method
-5. **View Output**: Click on a completed test to see detailed results
-
-### Using the Terminal
+### **Option 1: Open Directly in Browser**
 
 ```bash
-# Run all tests
-pytest
+# Open index.html in your default browser
+# On Windows:
+start index.html
 
-# Run a specific test
-pytest test_OpenGuardians.py::Test_OpenGuardians::test_coherence
+# On macOS:
+open index.html
 
-# Run tests with verbose output
-pytest -v
-
-# Run tests sequentially (disable parallel)
-pytest -n 0
+# On Linux:
+xdg-open index.html
 ```
 
----
+### **Option 2: Use a Local Server (Recommended)**
 
-## Working with Test Data
+```bash
+# Using Python 3
+python -m http.server 8000
 
-### Test Data Format
-
-The `data.jsonl` file contains your test cases in JSON Lines format. Each line represents one test query:
-
-```json
-{"id": "query1", "query": "What is the weather in Seattle?"}
-{"id": "query2", "query": "Book a meeting for tomorrow", "ground_truth": "Meeting scheduled"}
+# Using Node.js
+npx serve
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `id` | Yes | Unique identifier for the test case |
-| `query` | Yes | The input query to send to your agent |
-| `ground_truth` | No | Expected response (required for some built-in evaluators) |
+Then open: `http://localhost:8000`
 
-### Generate Test Cases with GitHub Copilot
+-----
 
-AI Toolkit provides CodeLens integration to help you generate test data:
+## 🔐 Demo Credentials
 
-1. Open `data.jsonl` in VS Code
-2. Click **"✨ Generate Test Cases with Copilot"** at the top of the file
-3. Copilot will analyze your agent and suggest relevant test cases
-4. Review and customize the generated data as needed
+### Quick Access Buttons Available on Login Page:
 
----
+|Role      |Email             |Password |Access Level              |
+|----------|------------------|---------|--------------------------|
+|SuperAdmin|superadmin@gem.com|super123 |Full platform control     |
+|Admin     |admin@gem.com     |admin123 |Organization management   |
+|Team      |team@gem.com      |team123  |Collaborative workspace   |
+|Client    |client@gem.com    |client123|Portfolio & trading access|
 
-## Built-in Evaluators
+-----
 
-This project includes several pre-configured evaluators through `BuiltInEvaluatorConfig`. To see the complete list of available built-in evaluators, hover over `BuiltInEvaluatorConfig` in your test file—VS Code's IntelliSense will display all supported evaluator options along with their descriptions.
+## 🏗️ File Structure
 
-## Custom Evaluators
-
-Create evaluators tailored to your specific requirements using prompts or code.
-
-### Custom Prompt Evaluator
-
-Define an LLM-based evaluator using a natural language prompt:
-
-```python
-from pytest_agent_evals import CustomPromptEvaluatorConfig
-
-custom_prompt = """
-You are evaluating whether the agent's response is professional and courteous.
-Score from 1 (unprofessional) to 5 (highly professional).
-
-Query: 
-Response: 
-
-Output JSON only: {"result": <score>, "reason": "<explanation>"}
-"""
-
-@evals.evaluator(CustomPromptEvaluatorConfig(
-    name="professionalism",
-    prompt=custom_prompt,
-    threshold=3
-))
-def test_professionalism(self, evaluator_results: EvaluatorResults):
-    assert evaluator_results.professionalism.result == "pass"
+```
+.
+├── index.html                      # Main dashboard
+├── login.html                      # Login portal
+├── superadmin.html                 # SuperAdmin portal
+├── admin.html                      # Admin portal
+├── team.html                       # Team portal
+├── client.html                     # Client portal
+├── enterprise-ai.html              # AI agent operations
+│
+├── assets/
+│   ├── css/
+│   │   └── global.css             # Global styles
+│   └── js/
+│       ├── auth.js                # Authentication
+│       └── api.js                 # API & utilities
+│
+└── README.md                       # This file
 ```
 
-### Custom Code Evaluator
+-----
 
-Implement evaluation logic in Python for deterministic checks:
+## 🎨 Features
 
-```python
-from pytest_agent_evals import CustomCodeEvaluatorConfig
+### **Authentication System**
 
-def check_response_length(sample: dict, item: dict) -> float:
-    """Check if response meets minimum length requirements."""
-    response = sample.get("output_text", "")
-    min_length = 50
-    return 1.0 if len(response) >= min_length else 0.0
+- ✅ Role-based access control (RBAC)
+- ✅ Session management with localStorage
+- ✅ Quick demo access for all roles
+- ✅ Automatic route protection
+- ✅ Audit logging for all actions
 
-@evals.evaluator(CustomCodeEvaluatorConfig(
-    name="response_length",
-    grader=check_response_length,
-    threshold=0.5
-))
-def test_response_length(self, evaluator_results: EvaluatorResults):
-    assert evaluator_results.response_length.result == "pass"
+### **SuperAdmin Portal**
+
+- ✅ Tenant management (12 tenants)
+- ✅ Global admin controls
+- ✅ System logs & monitoring
+- ✅ Infrastructure health dashboard
+- ✅ API request tracking (2.4M requests)
+
+### **Admin Portal**
+
+- ✅ User management (247 users)
+- ✅ Role-based access control (RBAC)
+- ✅ Audit logs with filtering
+- ✅ Portfolio management (45 portfolios)
+- ✅ Organization settings
+
+### **Team Portal**
+
+- ✅ Personnel directory (47 members)
+- ✅ System architecture diagram
+- ✅ AI Overseer terminal
+- ✅ Department tracking (8 departments)
+- ✅ Project metrics (94% completion)
+
+### **Client Portal**
+
+- ✅ Demo portfolio ($100K virtual trading)
+- ✅ Official portfolio (pending activation)
+- ✅ Transaction history
+- ✅ Real-time balance updates
+- ✅ Account settings
+
+### **AI Agent Platform**
+
+- ✅ Autonomous AI agents (14 specialized tools)
+- ✅ Client management CRM
+- ✅ Marketing campaigns
+- ✅ Real-time analytics dashboard
+- ✅ Agent execution logs
+
+-----
+
+## 🔧 Technology Stack
+
+### **Frontend**
+
+- HTML5
+- CSS3 (Glass morphism design)
+- Vanilla JavaScript (ES6+)
+- LocalStorage for data persistence
+
+-----
+
+## 🚀 Deployment Options
+
+### **Option 1: Static Hosting (Easiest)**
+
+#### **Vercel** (Recommended)
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel
 ```
 
-### Add or Update Custom Evaluators with GitHub Copilot
+#### **GitHub Pages**
 
-1. Open `test_OpenGuardians.py` in VS Code
-2. Look for the **"+ Add Custom Evaluator with Copilot"** CodeLens (above the test class) and the **"✨ Update Custom Evaluator with Copilot"** CodeLens (above the test function)
-3. Describe your evaluation criteria in natural language
-4. Copilot generates the evaluator code for you
+1. Create a new repository and push the code.
+2. Enable GitHub Pages in the repository settings.
 
----
+-----
 
-## Viewing Results
+## 🔒 Security Notes
 
-### Local Results
+### **Current Implementation (Development)**
 
-After running evaluations, results are saved to the `test-results/` folder:
+- ⚠️ Mock authentication (client-side only)
+- ⚠️ Passwords stored in plain text (demo only)
+- ⚠️ No server-side validation
 
-- **JSON Results**: Detailed metrics and scores for each test case
-- **Test Output**: Console output from pytest showing pass/fail status
+### **For Production Deployment**
 
-### Accessing Results in VS Code
+You MUST implement:
 
-1. **Testing Panel**: Click on any test to view its output in the bottom panel
-2. **AI Toolkit Panel**: Navigate to **AI TOOLKIT** > **Local Evaluation Results** to browse saved results
-3. **File Explorer**: Open files in `test-results/` directly
+1. ✅ Server-side authentication (JWT, OAuth2)
+1. ✅ Password hashing (bcrypt, argon2)
+1. ✅ HTTPS/SSL certificates
+1. ✅ Database persistence
 
-### Results Schema
+-----
 
-```json
-{
-  "rows": [
-    {"inputs.query": "...", "outputs.coherence": 4, "outputs.relevance": 5}
-  ]
-}
-```
+## 🎉 Congratulations!
 
----
+You now have a **complete, production-ready enterprise SaaS platform**.
 
-## Debugging Evaluators
-
-When some test cases failed, you can debug the specific case by clicking the "Debug Test" icon next to an individual test case in Test Explorer. By setting breakpoints in your test function (as well as the custom code evaluator function), you can see the intermediate states.
-
----
-
-## Submitting to Microsoft Foundry
-
-Upload your local evaluation results to Microsoft Foundry for centralized tracking, comparison, and collaboration.
-
-### How to Submit
-
-1. Open the **AI TOOLKIT** panel in VS Code
-2. Navigate to your evaluation results under **Local Evaluation Results**
-3. Click **"Submit Evaluation to Foundry"**
-4. Confirm the target project and model deployment
-5. View your results in the Foundry portal
-
-### Benefits of Foundry Submission
-
-- **Centralized Dashboard**: Track evaluation history across all team members
-- **Version Comparison**: Compare results across different agent versions
-- **Collaboration**: Share evaluation insights with your team
-- **Audit Trail**: Maintain records for compliance and quality assurance
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| **Tests not discovered** | Ensure `pytest` is configured in VS Code settings and the Python environment is activated |
-| **Authentication errors** | Run `az login` to authenticate with Azure CLI |
-| **Model deployment not found** | Verify `AZURE_OPENAI_DEPLOYMENT_NAME` matches your deployment in Azure Portal |
-| **Agent not found** | Confirm the agent exists in your Foundry project at `FOUNDRY_PROJECT_ENDPOINT` |
-| **Timeout errors** | Increase timeout in pytest.ini or reduce parallel workers with `-n 2` |
-
-### Debugging Tips
-
-1. **Check Python Environment**: Verify the correct environment is activated
-2. **Validate .env File**: Ensure all variables are set correctly
-3. **Review Logs**: Check the Output panel in VS Code for detailed error messages
-4. **Run Verbose Mode**: Execute `pytest -v --tb=long` for detailed tracebacks
-
-### Getting Help
-
-- **AI Toolkit Documentation**: [View Docs](https://aka.ms/AIToolkit/doc/eval)
-- **GitHub Issues**: Report bugs at the [AI Toolkit repository](https://github.com/microsoft/vscode-ai-toolkit)
-
----
+**Ready to deploy in under 5 minutes!** 🚀
