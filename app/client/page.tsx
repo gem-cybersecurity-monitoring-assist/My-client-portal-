@@ -17,9 +17,9 @@ export default function ClientPage() {
         icon={<Briefcase className="h-5 w-5 text-primary" />}
       />
 
-      <main className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         <div style={{ animation: "fadeIn 0.4s ease-out" }}>
-          <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
+          <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent sm:text-3xl">
             Welcome Back, {session?.name || "Client"}
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -27,7 +27,7 @@ export default function ClientPage() {
           </p>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {/* Portfolio Summary */}
           <GlassCard>
             <h3 className="mb-4 text-base font-bold text-foreground">Portfolio Summary</h3>
