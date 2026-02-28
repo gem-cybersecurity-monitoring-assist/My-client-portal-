@@ -18,11 +18,16 @@ function LoginPageContent() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [authMounted, setAuthMounted] = useState(false)
   const { login, isAuthenticated, isLoading, session } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (isAuthenticated && session) {
+    setAuthMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (authMounted && isAuthenticated && session) {
       const route =
         session.role === "superadmin"
           ? "/superadmin"
@@ -35,7 +40,7 @@ function LoginPageContent() {
                 : "/dashboard"
       router.replace(route)
     }
-  }, [isAuthenticated, session, router])
+  }, [authMounted, isAuthenticated, session, router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +65,7 @@ function LoginPageContent() {
     }
   }
 
-  if (isLoading || isAuthenticated) {
+  if (!authMounted || isLoading || isAuthenticated) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
