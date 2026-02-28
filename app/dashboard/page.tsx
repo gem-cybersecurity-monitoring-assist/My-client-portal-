@@ -61,32 +61,32 @@ export default function DashboardPage() {
     <AuthGuard>
       <PortalHeader title="GEM & ATR Platform" icon={<LayoutDashboard className="h-5 w-5 text-primary" />} />
 
-      <main className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         <div style={{ animation: "fadeIn 0.4s ease-out" }}>
-          <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent md:text-4xl">
+          <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent sm:text-4xl">
             GEM & ATR Platform
           </h1>
-          <p className="mt-1 text-sm text-muted md:text-base">
+          <p className="mt-1 text-sm text-muted sm:text-base">
             Welcome back, {session?.name || "Guest"}. Select a portal to continue.
           </p>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4">
           <StatCard value={7} label="Core Pages" />
           <StatCard value={6} label="Portals" />
           <StatCard value={4} label="User Roles" />
           <StatCard value="100%" label="Functional" />
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {portals.map((portal, i) => (
             <GlassCard key={portal.href} className="flex flex-col">
               <div style={{ animation: `fadeIn ${0.3 + i * 0.08}s ease-out` }}>
                 <div className="mb-3 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                    <portal.icon className="h-4.5 w-4.5 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 sm:h-9 sm:w-9">
+                    <portal.icon className="h-5 w-5 text-primary sm:h-4.5 sm:w-4.5" />
                   </div>
-                  <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  <span className="rounded-md bg-primary/15 px-2 py-1 text-xs font-bold uppercase tracking-wider text-primary">
                     {portal.badge}
                   </span>
                 </div>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm leading-relaxed text-muted">{portal.description}</p>
                 <Link
                   href={portal.href}
-                  className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-5 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-5 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {"Access Portal"}
                 </Link>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-8 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
+            className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-8 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Launch Platform
           </Link>

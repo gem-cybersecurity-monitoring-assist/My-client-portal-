@@ -21,30 +21,32 @@ export function PortalHeader({
   }
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-glass-border bg-background/80 px-4 py-3 backdrop-blur-lg md:px-6">
-      <div className="flex items-center gap-2.5">
-        <span className="text-xl">{icon}</span>
-        <span className="text-base font-bold text-foreground">{title}</span>
+    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-glass-border bg-background/80 px-4 py-3 backdrop-blur-lg sm:px-6">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span className="text-xl flex-shrink-0">{icon}</span>
+        <span className="text-base font-bold text-foreground truncate">{title}</span>
       </div>
-      <nav className="flex items-center gap-3 md:gap-5">
+      <nav className="flex items-center gap-2 sm:gap-5 flex-shrink-0">
         {session && (
-          <span className="hidden text-sm text-muted md:inline">
+          <span className="hidden text-sm text-muted sm:inline">
             {session.name}
           </span>
         )}
         <Link
           href="/dashboard"
-          className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-primary"
+          className="flex items-center gap-1.5 p-2 text-sm text-muted transition-colors hover:text-primary rounded-lg hover:bg-primary/10"
+          title="Dashboard"
         >
-          <LayoutDashboard className="h-4 w-4" />
-          <span className="hidden md:inline">Dashboard</span>
+          <LayoutDashboard className="h-5 w-5" />
+          <span className="hidden sm:inline">Dashboard</span>
         </Link>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-destructive"
+          className="flex items-center gap-1.5 p-2 text-sm text-muted transition-colors hover:text-destructive rounded-lg hover:bg-destructive/10"
+          title="Logout"
         >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden md:inline">Logout</span>
+          <LogOut className="h-5 w-5" />
+          <span className="hidden sm:inline">Logout</span>
         </button>
       </nav>
     </header>

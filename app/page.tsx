@@ -72,14 +72,14 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-12">
+    <div className="flex min-h-dvh items-center justify-center px-4 py-6 sm:py-12">
       <div className="w-full max-w-md" style={{ animation: "fadeIn 0.5s ease-out" }}>
-        <GlassCard hover={false} className="p-6 md:p-8">
+        <GlassCard hover={false} className="p-6 sm:p-8">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <Shield className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
+            <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent sm:text-3xl">
               GEM & ATR
             </h1>
             <p className="mt-1.5 text-sm text-muted">Secure Authentication Portal</p>
@@ -97,7 +97,7 @@ export default function Home() {
                 placeholder="name@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 w-full rounded-lg border border-glass-border bg-input px-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="h-12 w-full rounded-lg border border-glass-border bg-input px-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
@@ -111,12 +111,12 @@ export default function Home() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12 w-full rounded-lg border border-glass-border bg-input px-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="h-12 w-full rounded-lg border border-glass-border bg-input px-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
 
             {error && (
-              <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+              <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>
             )}
 
             <button
@@ -134,20 +134,25 @@ export default function Home() {
             <div className="h-px flex-1 bg-glass-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {quickAccess.map((item) => (
               <button
                 key={item.label}
                 onClick={() => handleQuickAccess(item)}
                 disabled={loading}
-                className="flex h-12 items-center justify-center gap-2 rounded-lg border border-glass-border bg-transparent text-sm font-semibold text-primary transition-all hover:bg-primary/10 disabled:opacity-60"
+                className="flex h-11 items-center justify-center gap-2 rounded-lg border border-glass-border bg-transparent text-xs font-semibold text-primary transition-all hover:bg-primary/10 active:bg-primary/20 disabled:opacity-60 sm:h-12 sm:text-sm"
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                <span className="hidden sm:inline">{item.label}</span>
+                <span className="sm:hidden">{item.label.split(" ")[0]}</span>
               </button>
             ))}
           </div>
         </GlassCard>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Demo Platform • Use quick access buttons below to login
+        </p>
       </div>
     </div>
   )
