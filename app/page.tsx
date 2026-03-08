@@ -7,50 +7,62 @@ import { GlassCard } from "@/components/glass-card"
 import { Shield, Crown, Settings, Users, Briefcase, Loader2 } from "lucide-react"
 
 const quickAccess = [
-  { label: "SuperAdmin", email: "superadmin@gem.com", pass: "super123", icon: Crown, route: "/superadmin" },
-  { label: "Admin", email: "admin@gem.com", pass: "admin123", icon: Settings, route: "/admin" },
-  { label: "Team", email: "team@gem.com", pass: "team123", icon: Users, route: "/team" },
-  { label: "Client", email: "client@gem.com", pass: "client123", icon: Briefcase, route: "/client" },
+  { label: "SuperAdmin", email: "superadmin@gem.com", pass: "super123", icon: Crown,    route: "/superadmin" },
+  { label: "Admin",      email: "admin@gem.com",      pass: "admin123", icon: Settings, route: "/admin" },
+  { label: "Team",       email: "team@gem.com",        pass: "team123", icon: Users,    route: "/team" },
+  { label: "Client",     email: "client@gem.com",     pass: "client123",icon: Briefcase,route: "/client" },
 ]
 
+function roleRoute(role: string) {
+  return role === "superadmin" ? "/superadmin"
+    : role === "admin"  ? "/admin"
+    : role === "team"   ? "/team"
+    : role === "client" ? "/client"
+    : "/dashboard"
+}
+
 export default function Home() {
-  const [email, setEmail] = useState("")
+  const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [error, setError]       = useState("")
+  const [loading, setLoading]   = useState(false)
   const { login, isAuthenticated, isLoading, session } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && session) {
-      const route = session.role === "superadmin" ? "/superadmin"
-        : session.role === "admin" ? "/admin"
-        : session.role === "team" ? "/team"
-        : session.role === "client" ? "/client"
-        : "/dashboard"
-      router.replace(route)
+      router.replace(roleRoute(session.role))
     }
   }, [isLoading, isAuthenticated, session, router])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
-    const success = login(email, password)
-    if (success) {
-      router.replace("/dashboard")
+    const result = await login(email, password)
+    if (result.ok) {
+      // session is now set; useEffect above will redirect once state updates.
+      // Derive route from submitted email for immediate navigation.
+      const role = email.startsWith("superadmin") ? "superadmin"
+        : email.startsWith("admin")  ? "admin"
+        : email.startsWith("team")   ? "team"
+        : email.startsWith("client") ? "client"
+        : ""
+      // Fall back to letting useEffect handle redirect if role unknown
+      if (role) router.replace(roleRoute(role))
     } else {
-      setError("Invalid credentials. Try one of the quick access options below.")
+      setError(result.error ?? "Invalid credentials.")
       setLoading(false)
     }
   }
 
-  const handleQuickAccess = (item: (typeof quickAccess)[0]) => {
+  const handleQuickAccess = async (item: (typeof quickAccess)[0]) => {
     setLoading(true)
-    const success = login(item.email, item.pass)
-    if (success) {
+    const result = await login(item.email, item.pass)
+    if (result.ok) {
       router.replace(item.route)
     } else {
+      setError(result.error ?? "Login failed.")
       setLoading(false)
     }
   }

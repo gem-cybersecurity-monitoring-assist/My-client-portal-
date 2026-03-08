@@ -1,9 +1,12 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
-import { USERS, type UserRole } from "./data"
+import { loginAction, logoutAction } from "@/lib/actions/auth"
+
+export type UserRole = "superadmin" | "admin" | "team" | "client"
 
 type Session = {
+  id: string
   email: string
   role: UserRole
   name: string
@@ -12,7 +15,7 @@ type Session = {
 
 type AuthContextType = {
   session: Session | null
-  login: (email: string, password: string) => boolean
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
   isAuthenticated: boolean
   isLoading: boolean
@@ -27,9 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem("gem_session")
-      if (stored) {
-        setSession(JSON.parse(stored))
-      }
+      if (stored) setSession(JSON.parse(stored))
     } catch {
       localStorage.removeItem("gem_session")
     }
@@ -38,24 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isLoading = !hydrated
 
-  const login = useCallback((email: string, password: string): boolean => {
-    const user = USERS[email]
-    if (!user || user.password !== password) return false
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await loginAction(email, password)
+    if (!result.ok) return { ok: false, error: result.error }
+
     const newSession: Session = {
-      email: user.email,
-      role: user.role,
-      name: user.name,
+      id:        result.user.id,
+      email:     result.user.email,
+      role:      result.user.role as UserRole,
+      name:      result.user.name,
       loginTime: new Date().toISOString(),
     }
     setSession(newSession)
     localStorage.setItem("gem_session", JSON.stringify(newSession))
-    return true
+    return { ok: true }
   }, [])
 
   const logout = useCallback(() => {
+    if (session?.id) {
+      logoutAction(session.id).catch(() => {})
+    }
     setSession(null)
     localStorage.removeItem("gem_session")
-  }, [])
+  }, [session])
 
   return (
     <AuthContext.Provider

@@ -6,7 +6,8 @@ import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatusBadge } from "@/components/status-badge"
 import { portfolios, teams } from "@/lib/data"
-import { Settings, Search } from "lucide-react"
+import { Settings, Search, ClipboardList, Users } from "lucide-react"
+import Link from "next/link"
 
 export default function AdminPage() {
   const [search, setSearch] = useState("")
@@ -29,6 +30,24 @@ export default function AdminPage() {
           <p className="mt-1 text-sm text-muted">
             User Administration & Portfolio Oversight
           </p>
+        </div>
+
+        {/* Sub-navigation */}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link
+            href="/admin/users"
+            className="flex items-center gap-2 rounded-lg border border-glass-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <Users className="h-4 w-4" />
+            Manage Users
+          </Link>
+          <Link
+            href="/admin/requests"
+            className="flex items-center gap-2 rounded-lg border border-glass-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <ClipboardList className="h-4 w-4" />
+            Service Requests
+          </Link>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">

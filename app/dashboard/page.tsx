@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           <StatCard value={7} label="Core Pages" />
-          <StatCard value={6} label="Portals" />
+          <StatCard value={5} label="Portals" />
           <StatCard value={4} label="User Roles" />
           <StatCard value="100%" label="Functional" />
         </div>
@@ -113,7 +113,7 @@ export default function DashboardPage() {
             Start with any portal above or explore the full platform.
           </p>
           <Link
-            href="/login"
+            href="/"
             className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-8 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
           >
             Launch Platform

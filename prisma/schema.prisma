@@ -1,0 +1,93 @@
+// Prisma schema — GEM & ATR Platform
+// Database: PostgreSQL
+// Run: pnpm db:migrate && pnpm db:seed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Models ────────────────────────────────────────────────────────────────
+// String fields used instead of enums for flexibility.
+// Valid values are documented inline and enforced via Zod in server actions.
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  name           String
+  role           String   // superadmin | admin | team | client
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  requests          ServiceRequest[] @relation("RequestClient")
+  managedRequests   ServiceRequest[] @relation("RequestAdmin")
+  approvals         Approval[]
+  reportedIncidents Incident[]       @relation("IncidentReporter")
+  assignedIncidents Incident[]       @relation("IncidentAssignee")
+  auditLogs         AuditLog[]
+}
+
+model ServiceRequest {
+  id        String   @id @default(cuid())
+  type      String   // Withdrawal | Deposit | Support | Account Change
+  subject   String
+  status    String   @default("Pending") // Pending | Approved | Rejected | In Review
+  priority  String   @default("Medium")  // Low | Medium | High
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientId String
+  client   User   @relation("RequestClient", fields: [clientId], references: [id])
+
+  adminId String?
+  admin   User?   @relation("RequestAdmin", fields: [adminId], references: [id])
+
+  approvals Approval[]
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  action    String   // Approved | Rejected | In Review
+  notes     String?
+  createdAt DateTime @default(now())
+
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id])
+
+  adminId String
+  admin   User   @relation(fields: [adminId], references: [id])
+}
+
+model Incident {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  severity    String   @default("Medium") // Low | Medium | High | Critical
+  status      String   @default("Open")   // Open | In Progress | Resolved | Closed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reportedById String
+  reportedBy   User   @relation("IncidentReporter", fields: [reportedById], references: [id])
+
+  assignedToId String?
+  assignedTo   User?   @relation("IncidentAssignee", fields: [assignedToId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // login | logout | request.create | request.approve | request.reject | incident.create | user.create
+  entity    String?  // User | ServiceRequest | Incident | Approval
+  entityId  String?
+  metadata  String?  // JSON string
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+}
