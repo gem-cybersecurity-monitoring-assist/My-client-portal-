@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { USERS } from "@/lib/data"
 import { GlassCard } from "@/components/glass-card"
 import { Shield, Crown, Settings, Users, Briefcase, Loader2 } from "lucide-react"
 
@@ -38,7 +39,13 @@ export default function Home() {
     setLoading(true)
     const success = login(email, password)
     if (success) {
-      router.replace("/dashboard")
+      const role = USERS[email]?.role
+      const route = role === "superadmin" ? "/superadmin"
+        : role === "admin" ? "/admin"
+        : role === "team" ? "/team"
+        : role === "client" ? "/client"
+        : "/dashboard"
+      router.replace(route)
     } else {
       setError("Invalid credentials. Try one of the quick access options below.")
       setLoading(false)
