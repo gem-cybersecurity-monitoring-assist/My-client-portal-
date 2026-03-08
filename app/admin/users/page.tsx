@@ -1,30 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatusBadge } from "@/components/status-badge"
-import { USERS } from "@/lib/data"
+import { getUsersAction, type UserRow } from "@/lib/actions/users"
 import { Users, ArrowLeft, Search, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 
 const roleVariant: Record<string, "default" | "success" | "warning" | "critical" | "info"> = {
   superadmin: "critical",
-  admin: "warning",
-  team: "info",
-  client: "success",
+  admin:      "warning",
+  team:       "info",
+  client:     "success",
 }
 
 export default function AdminUsersPage() {
-  const [search, setSearch] = useState("")
+  const [users, setUsers]     = useState<UserRow[]>([])
+  const [search, setSearch]   = useState("")
+  const [loadError, setLoadError] = useState("")
 
-  const users = Object.values(USERS).filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      u.role.toLowerCase().includes(search.toLowerCase()),
-  )
+  useEffect(() => {
+    getUsersAction()
+      .then(setUsers)
+      .catch(() => setLoadError("Failed to load users."))
+  }, [])
+
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase()
+    return (
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    )
+  })
 
   return (
     <AuthGuard requiredRole="admin">
@@ -49,18 +59,17 @@ export default function AdminUsersPage() {
             User Management
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Platform accounts and role assignments ({Object.keys(USERS).length} users)
+            Platform accounts and role assignments ({users.length} users)
           </p>
         </div>
 
         <GlassCard className="mt-6">
-          {/* Search + invite header */}
           <div className="mb-4 flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
               <input
                 type="text"
-                placeholder="Search by name, email, or role..."
+                placeholder="Search by name, email, or role…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-11 w-full rounded-lg border border-glass-border bg-input pl-10 pr-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
@@ -71,28 +80,27 @@ export default function AdminUsersPage() {
             </button>
           </div>
 
-          {/* User table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-glass-border">
-                  <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-primary">Name</th>
-                  <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-primary">Email</th>
-                  <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-primary">Role</th>
-                  <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-primary">Status</th>
-                  <th className="pb-3 text-xs font-bold uppercase tracking-wider text-primary">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-sm text-muted">
-                      No users match your search.
-                    </td>
+          {loadError ? (
+            <p className="py-4 text-sm text-destructive">{loadError}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-glass-border">
+                    {["Name", "Email", "Role", "Status", "Joined", "Actions"].map((h) => (
+                      <th key={h} className="pb-3 pr-4 text-xs font-bold uppercase tracking-wider text-primary last:pr-0">{h}</th>
+                    ))}
                   </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr key={user.email} className="border-b border-border/50 hover:bg-surface/50">
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-sm text-muted">
+                        {users.length === 0 ? "Loading…" : "No users match your search."}
+                      </td>
+                    </tr>
+                  ) : filtered.map((user) => (
+                    <tr key={user.id} className="border-b border-border/50 hover:bg-surface/50">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -103,25 +111,23 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="py-3 pr-4 text-muted">{user.email}</td>
                       <td className="py-3 pr-4">
-                        <StatusBadge
-                          label={user.role}
-                          variant={roleVariant[user.role] ?? "default"}
-                        />
+                        <StatusBadge label={user.role} variant={roleVariant[user.role] ?? "default"} />
                       </td>
                       <td className="py-3 pr-4">
-                        <StatusBadge label="Active" variant="success" />
+                        <StatusBadge label={user.active ? "Active" : "Inactive"} variant={user.active ? "success" : "critical"} />
                       </td>
+                      <td className="py-3 pr-4 text-muted">{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td className="py-3">
                         <button className="rounded-lg border border-glass-border px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary/10">
                           Manage
                         </button>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </GlassCard>
       </main>
     </AuthGuard>

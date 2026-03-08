@@ -1,37 +1,56 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatusBadge } from "@/components/status-badge"
-import { serviceRequests } from "@/lib/data"
-import { FileText, ArrowLeft } from "lucide-react"
+import { createRequestAction, getMyRequestsAction, type RequestRow } from "@/lib/actions/requests"
+import { FileText, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 const statusVariant: Record<string, "default" | "success" | "warning" | "critical" | "info"> = {
-  Pending: "warning",
-  Approved: "success",
-  Rejected: "critical",
-  "In Review": "info",
+  Pending:    "warning",
+  Approved:   "success",
+  Rejected:   "critical",
+  "In Review":"info",
 }
 
 const requestTypes = ["Withdrawal", "Deposit", "Support", "Account Change"] as const
 
 export default function ClientRequestsPage() {
   const { session } = useAuth()
-  const [type, setType] = useState<typeof requestTypes[number]>("Support")
-  const [subject, setSubject] = useState("")
+  const [type, setType]         = useState<typeof requestTypes[number]>("Support")
+  const [subject, setSubject]   = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [requests, setRequests] = useState<RequestRow[]>([])
+  const [loadError, setLoadError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-  const myRequests = serviceRequests.filter((r) => r.email === session?.email)
+  // Load DB requests for this client
+  useEffect(() => {
+    if (!session?.email) return
+    getMyRequestsAction(session.email)
+      .then(setRequests)
+      .catch(() => setLoadError("Failed to load requests."))
+  }, [session?.email, submitted])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!subject.trim()) return
-    setSubmitted(true)
-    setSubject("")
+    if (!subject.trim() || !session?.email) return
+
+    startTransition(async () => {
+      const result = await createRequestAction({
+        type,
+        subject: subject.trim(),
+        clientEmail: session.email,
+      })
+      if (result.ok) {
+        setSubmitted(true)
+        setSubject("")
+      }
+    })
   }
 
   return (
@@ -83,9 +102,7 @@ export default function ClientRequestsPage() {
                     onChange={(e) => setType(e.target.value as typeof requestTypes[number])}
                     className="h-11 w-full rounded-lg border border-glass-border bg-input px-3 text-base text-foreground outline-none focus:border-primary"
                   >
-                    {requestTypes.map((t) => (
-                      <option key={t}>{t}</option>
-                    ))}
+                    {requestTypes.map((t) => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
@@ -95,28 +112,31 @@ export default function ClientRequestsPage() {
                     rows={4}
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Describe your request..."
+                    placeholder="Describe your request…"
                     className="w-full rounded-lg border border-glass-border bg-input px-3 py-2.5 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="h-11 w-full rounded-lg bg-gradient-to-r from-primary to-secondary text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
+                  disabled={isPending}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] disabled:opacity-60"
                 >
-                  Submit Request
+                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Request"}
                 </button>
               </form>
             )}
           </GlassCard>
 
-          {/* My request history */}
+          {/* Request history from DB */}
           <GlassCard>
             <h3 className="mb-4 text-base font-bold text-foreground">My Requests</h3>
-            {myRequests.length === 0 ? (
+            {loadError ? (
+              <p className="text-sm text-destructive">{loadError}</p>
+            ) : requests.length === 0 ? (
               <p className="text-sm text-muted">No requests on file.</p>
             ) : (
               <div className="space-y-2">
-                {myRequests.map((req) => (
+                {requests.map((req) => (
                   <div
                     key={req.id}
                     className="rounded-lg border border-border/50 px-3 py-3 transition-colors hover:bg-surface"
@@ -129,11 +149,9 @@ export default function ClientRequestsPage() {
                       />
                     </div>
                     <div className="mt-1 flex items-center gap-3 text-xs text-muted">
-                      <span>{req.id}</span>
-                      <span>·</span>
                       <span>{req.type}</span>
                       <span>·</span>
-                      <span>{req.date}</span>
+                      <span>{new Date(req.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 ))}
