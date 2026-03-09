@@ -1,15 +1,50 @@
 "use client"
 
+import { memo } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatCard } from "@/components/stat-card"
 import { StatusBadge } from "@/components/status-badge"
-import { tenants, logs } from "@/lib/data"
+import { tenants, logs, type Tenant, type LogEntry } from "@/lib/data"
 import { Crown } from "lucide-react"
 
 // ⚡ Bolt Optimization: Move static icon out of render function.
 const SUPERADMIN_ICON = <Crown className="h-5 w-5 text-primary" />
+
+/**
+ * ⚡ Bolt Optimization: Memoize individual Tenant rows.
+ * Prevents unnecessary re-renders when other parts of the SuperAdmin page update.
+ */
+const TenantRow = memo(function TenantRow({ tenant }: { tenant: Tenant }) {
+  return (
+    <tr className="border-b border-border/50">
+      <td className="py-3 pr-4 font-medium text-foreground">{tenant.name}</td>
+      <td className="py-3 pr-4">
+        <StatusBadge
+          label={tenant.status}
+          variant={tenant.status.toLowerCase() as "healthy" | "warning" | "critical"}
+        />
+      </td>
+      <td className="py-3 pr-4 text-muted">{tenant.users}</td>
+      <td className="py-3 font-semibold text-foreground">{tenant.revenue}</td>
+    </tr>
+  )
+})
+
+/**
+ * ⚡ Bolt Optimization: Memoize individual System Log items.
+ * Uses a stable composite key in the parent list to optimize reconciliation.
+ */
+const SystemLogItem = memo(function SystemLogItem({ log }: { log: LogEntry }) {
+  return (
+    <div className="flex flex-col gap-0.5 border-b border-border/30 pb-2 md:flex-row md:items-center md:gap-3">
+      <span className="text-xs text-muted">[{log.time}]</span>
+      <span className="text-xs font-semibold text-secondary">{log.user}</span>
+      <span className="text-xs text-foreground">{log.action}</span>
+    </div>
+  )
+})
 
 export default function SuperAdminPage() {
   return (
@@ -44,17 +79,7 @@ export default function SuperAdminPage() {
               </thead>
               <tbody>
                 {tenants.map((t) => (
-                  <tr key={t.id} className="border-b border-border/50">
-                    <td className="py-3 pr-4 font-medium text-foreground">{t.name}</td>
-                    <td className="py-3 pr-4">
-                      <StatusBadge
-                        label={t.status}
-                        variant={t.status.toLowerCase() as "healthy" | "warning" | "critical"}
-                      />
-                    </td>
-                    <td className="py-3 pr-4 text-muted">{t.users}</td>
-                    <td className="py-3 font-semibold text-foreground">{t.revenue}</td>
-                  </tr>
+                  <TenantRow key={t.id} tenant={t} />
                 ))}
               </tbody>
             </table>
@@ -65,15 +90,11 @@ export default function SuperAdminPage() {
         <GlassCard className="mt-4">
           <h3 className="mb-4 text-base font-bold text-foreground">System Logs</h3>
           <div className="max-h-64 space-y-2 overflow-y-auto font-mono text-sm">
-            {logs.map((l, i) => (
-              <div
-                key={i}
-                className="flex flex-col gap-0.5 border-b border-border/30 pb-2 md:flex-row md:items-center md:gap-3"
-              >
-                <span className="text-xs text-muted">[{l.time}]</span>
-                <span className="text-xs font-semibold text-secondary">{l.user}</span>
-                <span className="text-xs text-foreground">{l.action}</span>
-              </div>
+            {logs.map((l) => (
+              <SystemLogItem
+                key={`${l.time}-${l.user}-${l.action}`}
+                log={l}
+              />
             ))}
           </div>
         </GlassCard>
