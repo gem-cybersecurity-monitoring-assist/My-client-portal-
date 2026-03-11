@@ -30,6 +30,8 @@ model User {
   reportedIncidents Incident[]       @relation("IncidentReporter")
   assignedIncidents Incident[]       @relation("IncidentAssignee")
   auditLogs         AuditLog[]
+  ownedPortfolios   Portfolio[]      @relation("PortfolioOwner")
+  managedPortfolios Portfolio[]      @relation("PortfolioManager")
 }
 
 model ServiceRequest {
@@ -82,12 +84,88 @@ model Incident {
 
 model AuditLog {
   id        String   @id @default(cuid())
-  action    String   // login | logout | request.create | request.approve | request.reject | incident.create | user.create
-  entity    String?  // User | ServiceRequest | Incident | Approval
+  action    String
+  entity    String?
   entityId  String?
   metadata  String?  // JSON string
   createdAt DateTime @default(now())
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
+}
+
+// ─── Portfolio Models ───────────────────────────────────────────────────────
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("Active") // Active | Inactive | Closed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation("PortfolioOwner", fields: [ownerId], references: [id])
+
+  managedById String?
+  managedBy   User?   @relation("PortfolioManager", fields: [managedById], references: [id])
+
+  accounts     PortfolioAccount[]
+  holdings     Holding[]
+  transactions PortfolioTransaction[]
+  snapshots    PerformanceSnapshot[]
+}
+
+model PortfolioAccount {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // Cash | Investment | Retirement | Custodial
+  balance   Float    @default(0)
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+}
+
+model Holding {
+  id           String   @id @default(cuid())
+  name         String
+  symbol       String
+  assetClass   String   // STOCK | CRYPTO | REAL_ESTATE | PRIVATE_EQUITY | BONDS | CASH
+  quantity     Float
+  costBasis    Float    // total cost basis in USD
+  currentValue Float    // current market value in USD
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+}
+
+model PortfolioTransaction {
+  id           String   @id @default(cuid())
+  type         String   // BUY | SELL | DIVIDEND | DEPOSIT | WITHDRAWAL | FEE
+  description  String
+  amount       Float    // total USD amount
+  quantity     Float?   // units (optional for cash txns)
+  pricePerUnit Float?   // price per unit at execution (optional)
+  symbol       String?  // ticker / asset symbol (optional)
+  createdAt    DateTime @default(now())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+}
+
+model PerformanceSnapshot {
+  id           String   @id @default(cuid())
+  date         DateTime
+  totalValue   Float
+  dayChange    Float    @default(0)
+  dayChangePct Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }

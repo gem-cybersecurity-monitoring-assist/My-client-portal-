@@ -6,7 +6,7 @@ import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatusBadge } from "@/components/status-badge"
 import { portfolios, teams } from "@/lib/data"
-import { Settings, Search, ClipboardList, Users } from "lucide-react"
+import { Settings, Search, ClipboardList, Users, PieChart } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminPage() {
@@ -47,6 +47,13 @@ export default function AdminPage() {
           >
             <ClipboardList className="h-4 w-4" />
             Service Requests
+          </Link>
+          <Link
+            href="/admin/portfolios"
+            className="flex items-center gap-2 rounded-lg border border-glass-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <PieChart className="h-4 w-4" />
+            Portfolios
           </Link>
         </div>
 

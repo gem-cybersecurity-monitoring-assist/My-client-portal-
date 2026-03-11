@@ -226,6 +226,89 @@ async function main() {
   }
 
   console.log("  ✓ 5 audit log entries")
+
+  // ── Portfolio ─────────────────────────────────────────────────────────────
+
+  const portfolio = await prisma.portfolio.upsert({
+    where:  { id: "seed-portfolio-001" },
+    update: {},
+    create: {
+      id:          "seed-portfolio-001",
+      name:        "Platform Client Growth Portfolio",
+      description: "Diversified growth-oriented portfolio across equities, bonds, and real estate.",
+      status:      "Active",
+      ownerId:     client.id,
+      managedById: admin.id,
+      accounts: {
+        create: [
+          { id: "seed-acct-001", name: "Primary Cash",       type: "Cash",      balance: 15420.50  },
+          { id: "seed-acct-002", name: "Investment Account", type: "Investment", balance: 112424.82 },
+        ],
+      },
+    },
+  })
+
+  const holdingSeed = [
+    { id: "seed-h-001", name: "Apple Inc.",         symbol: "AAPL",  assetClass: "STOCK",          quantity: 200,  costBasis: 26980, currentValue: 38500 },
+    { id: "seed-h-002", name: "Microsoft Corp.",    symbol: "MSFT",  assetClass: "STOCK",          quantity: 90,   costBasis: 27375, currentValue: 36500 },
+    { id: "seed-h-003", name: "Bitcoin",            symbol: "BTC",   assetClass: "CRYPTO",         quantity: 0.78, costBasis: 28060, currentValue: 32000 },
+    { id: "seed-h-004", name: "Prologis REIT",      symbol: "PLD",   assetClass: "REAL_ESTATE",    quantity: 350,  costBasis: 35000, currentValue: 42000 },
+    { id: "seed-h-005", name: "US Treasury 10Y",    symbol: "UST10", assetClass: "BONDS",          quantity: 20,   costBasis: 18500, currentValue: 19650 },
+    { id: "seed-h-006", name: "Blackstone PE Fund", symbol: "BXPE",  assetClass: "PRIVATE_EQUITY", quantity: 1,    costBasis: 45000, currentValue: 50000 },
+  ]
+  for (const h of holdingSeed) {
+    await prisma.holding.upsert({
+      where:  { id: h.id },
+      update: {},
+      create: { ...h, portfolioId: portfolio.id },
+    })
+  }
+
+  const txSeed = [
+    { id: "seed-tx-001", type: "BUY",      description: "Purchased Apple Inc. (200 shares)",        amount: 26980, quantity: 200,  pricePerUnit: 134.90, symbol: "AAPL" },
+    { id: "seed-tx-002", type: "BUY",      description: "Purchased Microsoft Corp. (90 shares)",     amount: 27375, quantity: 90,   pricePerUnit: 304.17, symbol: "MSFT" },
+    { id: "seed-tx-003", type: "BUY",      description: "Bitcoin purchase",                           amount: 28060, quantity: 0.78, pricePerUnit: 35974,  symbol: "BTC"  },
+    { id: "seed-tx-004", type: "DIVIDEND", description: "Microsoft quarterly dividend",               amount: 285,   quantity: null, pricePerUnit: null,   symbol: "MSFT" },
+    { id: "seed-tx-005", type: "DEPOSIT",  description: "Initial cash deposit to investment account", amount: 50000, quantity: null, pricePerUnit: null,   symbol: null   },
+    { id: "seed-tx-006", type: "BUY",      description: "Prologis REIT purchase (350 units)",         amount: 35000, quantity: 350,  pricePerUnit: 100,    symbol: "PLD"  },
+    { id: "seed-tx-007", type: "FEE",      description: "Annual portfolio management fee",             amount: 250,   quantity: null, pricePerUnit: null,   symbol: null   },
+  ]
+  for (const tx of txSeed) {
+    await prisma.portfolioTransaction.upsert({
+      where:  { id: tx.id },
+      update: {},
+      create: { ...tx, portfolioId: portfolio.id },
+    })
+  }
+
+  const baseValue = 218650
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    const totalValue  = baseValue + (i * 500 - 1500)  // deterministic, no Math.random
+    const snapId      = `seed-snap-00${7 - i}`
+    await prisma.performanceSnapshot.upsert({
+      where:  { id: snapId },
+      update: {},
+      create: {
+        id: snapId, date: d, totalValue,
+        dayChange: totalValue - baseValue,
+        dayChangePct: ((totalValue - baseValue) / baseValue) * 100,
+        portfolioId: portfolio.id,
+      },
+    })
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId:   admin.id,
+      action:   "portfolio.create",
+      entity:   "Portfolio",
+      entityId: portfolio.id,
+      metadata: JSON.stringify({ name: portfolio.name, ownerEmail: client.email }),
+    },
+  })
+
+  console.log("  ✓ 1 portfolio, 2 accounts, 6 holdings, 7 transactions, 7 snapshots")
   console.log("\n✅ Seed complete.")
 }
 

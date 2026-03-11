@@ -5,7 +5,7 @@ import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { transactions } from "@/lib/data"
-import { Briefcase, ArrowUpRight, ArrowDownRight, FileText } from "lucide-react"
+import { Briefcase, ArrowUpRight, ArrowDownRight, FileText, PieChart } from "lucide-react"
 import Link from "next/link"
 
 export default function ClientPage() {
@@ -36,6 +36,13 @@ export default function ClientPage() {
           >
             <FileText className="h-4 w-4" />
             My Requests
+          </Link>
+          <Link
+            href="/client/portfolio"
+            className="flex items-center gap-2 rounded-lg border border-glass-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <PieChart className="h-4 w-4" />
+            My Portfolio
           </Link>
         </div>
 
@@ -126,3 +133,4 @@ export default function ClientPage() {
     </AuthGuard>
   )
 }
+
