@@ -1,6 +1,6 @@
 // Prisma schema — GEM & ATR Platform
 // Database: PostgreSQL
-// Run: pnpm db:migrate && pnpm db:seed
+// Run: pnpm db:push && npx prisma generate && pnpm db:seed
 
 generator client {
   provider = "prisma-client-js"
@@ -10,9 +10,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── Models ────────────────────────────────────────────────────────────────
-// String fields used instead of enums for flexibility.
-// Valid values are documented inline and enforced via Zod in server actions.
+// ─── Core Models ───────────────────────────────────────────────────────────
 
 model User {
   id             String   @id @default(cuid())
@@ -94,7 +92,7 @@ model AuditLog {
   user   User?   @relation(fields: [userId], references: [id])
 }
 
-// ─── Portfolio Models ───────────────────────────────────────────────────────
+// ─── Portfolio Models ──────────────────────────────────────────────────────
 
 model Portfolio {
   id          String   @id @default(cuid())
@@ -146,12 +144,18 @@ model Holding {
 
 model PortfolioTransaction {
   id           String   @id @default(cuid())
-  type         String   // BUY | SELL | DIVIDEND | DEPOSIT | WITHDRAWAL | FEE
+  type         String   // BUY | SELL | DIVIDEND | DEPOSIT | WITHDRAWAL | FEE | TRANSFER
   description  String
-  amount       Float    // total USD amount
+  amount       Float    // total USD amount (always positive; type indicates direction)
   quantity     Float?   // units (optional for cash txns)
   pricePerUnit Float?   // price per unit at execution (optional)
   symbol       String?  // ticker / asset symbol (optional)
+
+  // Phase-7 additions
+  status       String   @default("Confirmed") // Pending | Confirmed | Reversed
+  adminNote    String?                         // admin correction/reversal note
+  reversalOfId String?                         // ID of the original tx this reverses
+
   createdAt    DateTime @default(now())
 
   portfolioId String

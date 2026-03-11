@@ -264,51 +264,90 @@ async function main() {
     })
   }
 
-  const txSeed = [
-    { id: "seed-tx-001", type: "BUY",      description: "Purchased Apple Inc. (200 shares)",        amount: 26980, quantity: 200,  pricePerUnit: 134.90, symbol: "AAPL" },
-    { id: "seed-tx-002", type: "BUY",      description: "Purchased Microsoft Corp. (90 shares)",     amount: 27375, quantity: 90,   pricePerUnit: 304.17, symbol: "MSFT" },
-    { id: "seed-tx-003", type: "BUY",      description: "Bitcoin purchase",                           amount: 28060, quantity: 0.78, pricePerUnit: 35974,  symbol: "BTC"  },
-    { id: "seed-tx-004", type: "DIVIDEND", description: "Microsoft quarterly dividend",               amount: 285,   quantity: null, pricePerUnit: null,   symbol: "MSFT" },
-    { id: "seed-tx-005", type: "DEPOSIT",  description: "Initial cash deposit to investment account", amount: 50000, quantity: null, pricePerUnit: null,   symbol: null   },
-    { id: "seed-tx-006", type: "BUY",      description: "Prologis REIT purchase (350 units)",         amount: 35000, quantity: 350,  pricePerUnit: 100,    symbol: "PLD"  },
-    { id: "seed-tx-007", type: "FEE",      description: "Annual portfolio management fee",             amount: 250,   quantity: null, pricePerUnit: null,   symbol: null   },
+  // ── Transactions (richer dataset with statuses) ────────────────────────────
+  type TxSeed = {
+    id: string; type: string; description: string; amount: number
+    quantity?: number | null; pricePerUnit?: number | null; symbol?: string | null
+    status: string; adminNote?: string | null; reversalOfId?: string | null
+  }
+  const txSeed: TxSeed[] = [
+    // Confirmed historical buys
+    { id: "seed-tx-001", type: "DEPOSIT",  description: "Initial portfolio funding",                   amount: 100000, status: "Confirmed", symbol: null    },
+    { id: "seed-tx-002", type: "BUY",      description: "Purchased Apple Inc. (200 shares @ $134.90)", amount: 26980,  status: "Confirmed", quantity: 200,  pricePerUnit: 134.90, symbol: "AAPL" },
+    { id: "seed-tx-003", type: "BUY",      description: "Purchased Microsoft Corp. (90 shares)",        amount: 27375,  status: "Confirmed", quantity: 90,   pricePerUnit: 304.17, symbol: "MSFT" },
+    { id: "seed-tx-004", type: "BUY",      description: "Bitcoin purchase (0.78 BTC @ $35,974)",        amount: 28060,  status: "Confirmed", quantity: 0.78, pricePerUnit: 35974,  symbol: "BTC"  },
+    { id: "seed-tx-005", type: "BUY",      description: "Prologis REIT (350 units @ $100.00)",          amount: 35000,  status: "Confirmed", quantity: 350,  pricePerUnit: 100,    symbol: "PLD"  },
+    { id: "seed-tx-006", type: "BUY",      description: "US Treasury 10Y (20 bonds)",                   amount: 18500,  status: "Confirmed", quantity: 20,   pricePerUnit: 925,    symbol: "UST10"},
+    { id: "seed-tx-007", type: "BUY",      description: "Blackstone PE Fund commitment",                amount: 45000,  status: "Confirmed", quantity: 1,    pricePerUnit: 45000,  symbol: "BXPE" },
+    // Dividends and fees
+    { id: "seed-tx-008", type: "DIVIDEND", description: "Microsoft Q1 2025 dividend",                   amount: 285,    status: "Confirmed", symbol: "MSFT" },
+    { id: "seed-tx-009", type: "DIVIDEND", description: "Prologis REIT Q1 2025 distribution",           amount: 420,    status: "Confirmed", symbol: "PLD"  },
+    { id: "seed-tx-010", type: "FEE",      description: "Q1 2025 portfolio management fee (0.25%)",      amount: 547,    status: "Confirmed", symbol: null   },
+    // A reversal example
+    { id: "seed-tx-011", type: "WITHDRAWAL", description: "Withdrawal request — duplicate entry",        amount: 5000,   status: "Reversed",  adminNote: "Reversed: duplicate submission by client", symbol: null },
+    { id: "seed-tx-012", type: "WITHDRAWAL", description: "REVERSAL: Withdrawal request — duplicate entry", amount: 5000, status: "Reversed", adminNote: "Reversed: duplicate submission by client", reversalOfId: "seed-tx-011", symbol: null },
+    // Pending client requests
+    { id: "seed-tx-013", type: "DEPOSIT",    description: "Monthly savings transfer",                    amount: 2500,   status: "Pending",   symbol: null   },
+    // A corrected transaction
+    { id: "seed-tx-014", type: "DIVIDEND",   description: "Apple Q1 2025 dividend (corrected)",          amount: 142,    status: "Confirmed", adminNote: "Corrected: original amount was $128, updated per corporate action notice", symbol: "AAPL" },
   ]
   for (const tx of txSeed) {
     await prisma.portfolioTransaction.upsert({
       where:  { id: tx.id },
       update: {},
-      create: { ...tx, portfolioId: portfolio.id },
+      create: {
+        portfolioId:  portfolio.id,
+        type:         tx.type,
+        description:  tx.description,
+        amount:       tx.amount,
+        quantity:     tx.quantity ?? null,
+        pricePerUnit: tx.pricePerUnit ?? null,
+        symbol:       tx.symbol ?? null,
+        status:       tx.status,
+        adminNote:    tx.adminNote ?? null,
+        reversalOfId: tx.reversalOfId ?? null,
+      },
     })
   }
 
+  // ── Performance Snapshots (30 days, daily) ──────────────────────────────
   const baseValue = 218650
-  for (let i = 6; i >= 0; i--) {
+  const seedSnapCount = 30
+  for (let i = seedSnapCount - 1; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i)
-    const totalValue  = baseValue + (i * 500 - 1500)  // deterministic, no Math.random
-    const snapId      = `seed-snap-00${7 - i}`
+    // Simulate a mild upward trend with small perturbations
+    const trend      = (seedSnapCount - 1 - i) * 120     // +$120/day trend
+    const perturbation = ((i * 37) % 1000) - 500          // deterministic ±$500
+    const totalValue = baseValue + trend + perturbation
+    const dayChange  = i === seedSnapCount - 1 ? 0 : 120 + (((i * 37) % 1000) - 500)
+    const snapId     = `seed-snap-${String(seedSnapCount - i).padStart(3, "0")}`
     await prisma.performanceSnapshot.upsert({
       where:  { id: snapId },
       update: {},
       create: {
         id: snapId, date: d, totalValue,
-        dayChange: totalValue - baseValue,
-        dayChangePct: ((totalValue - baseValue) / baseValue) * 100,
+        dayChange,
+        dayChangePct: (dayChange / baseValue) * 100,
         portfolioId: portfolio.id,
       },
     })
   }
 
+  // ── Audit logs for portfolio operations ─────────────────────────────────
   await prisma.auditLog.create({
-    data: {
-      userId:   admin.id,
-      action:   "portfolio.create",
-      entity:   "Portfolio",
-      entityId: portfolio.id,
-      metadata: JSON.stringify({ name: portfolio.name, ownerEmail: client.email }),
-    },
+    data: { userId: admin.id, action: "portfolio.create",   entity: "Portfolio",            entityId: portfolio.id,      metadata: JSON.stringify({ name: portfolio.name, ownerEmail: client.email }) },
+  })
+  await prisma.auditLog.create({
+    data: { userId: admin.id, action: "portfolio.transaction.reverse", entity: "PortfolioTransaction", entityId: "seed-tx-011", metadata: JSON.stringify({ reason: "duplicate submission" }) },
+  })
+  await prisma.auditLog.create({
+    data: { userId: admin.id, action: "portfolio.transaction.correct", entity: "PortfolioTransaction", entityId: "seed-tx-014", metadata: JSON.stringify({ note: "Corporate action update" }) },
+  })
+  await prisma.auditLog.create({
+    data: { userId: client.id, action: "portfolio.transaction.add", entity: "PortfolioTransaction", entityId: "seed-tx-013", metadata: JSON.stringify({ type: "DEPOSIT", amount: 2500, status: "Pending" }) },
   })
 
-  console.log("  ✓ 1 portfolio, 2 accounts, 6 holdings, 7 transactions, 7 snapshots")
+  console.log("  ✓ 1 portfolio, 2 accounts, 6 holdings, 14 transactions (confirmed/pending/reversed), 30 snapshots")
   console.log("\n✅ Seed complete.")
 }
 
