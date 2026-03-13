@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenGuardians — Community App</title>
+  <style>
+    :root{
+      --bg:#f6f1e8;
+      --paper:#fffaf1;
+      --card:#fbf6ee;
+      --card-strong:#fffdf8;
+      --ink:#171513;
+      --muted:#6e655d;
+      --line:#d9cfbf;
+      --accent:#111111;
+      --accent-2:#2d241d;
+      --good:#285f43;
+      --warn:#8d5d00;
+      --bad:#8f2f2f;
+      --soft-good:#e7f2eb;
+      --soft-warn:#f7edd8;
+      --soft-bad:#f7e4e4;
+      --shadow:0 20px 60px rgba(23,21,19,.08);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.45;
+    }
+
+    h1,h2,h3,h4{
+      font-family: Georgia, "Times New Roman", serif;
+      letter-spacing:-.03em;
+      margin:0;
+    }
+
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer}
+    .hidden{display:none !important}
+
+    /* ── App shell ─────────────────────────────── */
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    /* ── Sidebar ───────────────────────────────── */
+    .sidebar{
+      position:sticky;
+      top:0;
+      height:100vh;
+      padding:20px;
+      border-right:1px solid var(--line);
+      background:rgba(255,250,241,.92);
+      backdrop-filter: blur(12px);
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 8px 18px;
+    }
+
+    .brand-mark{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:#111;
+      color:#fff;
+      font-size:20px;
+      box-shadow:var(--shadow);
+      flex:0 0 auto;
+    }
+
+    .brand-copy strong{display:block;font-size:16px;letter-spacing:-.02em}
+    .brand-copy span{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-top:2px}
+
+    .section-title{
+      font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--muted);font-weight:800;padding:18px 10px 10px;
+    }
+
+    .nav-list{display:grid;gap:6px}
+
+    .nav-btn{
+      width:100%;text-align:left;
+      border:1px solid transparent;
+      background:transparent;color:var(--accent-2);
+      padding:12px 14px;border-radius:18px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      transition:.18s ease;
+    }
+
+    .nav-btn:hover{background:var(--paper);border-color:var(--line)}
+
+    .nav-btn.active{
+      background:var(--accent);color:#fff;
+      border-color:var(--accent);box-shadow:var(--shadow);
+    }
+
+    .nav-left{display:flex;align-items:center;gap:10px;min-width:0}
+
+    .nav-icon{
+      width:28px;height:28px;border-radius:10px;
+      display:grid;place-items:center;
+      background:rgba(0,0,0,.06);flex:0 0 auto;font-size:15px;
+    }
+
+    .nav-btn.active .nav-icon{background:rgba(255,255,255,.14)}
+
+    .nav-meta{min-width:0}
+    .nav-meta strong{display:block;font-size:13px;letter-spacing:-.01em}
+    .nav-meta span{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .nav-btn.active .nav-meta span{color:rgba(255,255,255,.65)}
+
+    .nav-count{
+      font-size:11px;padding:4px 9px;border-radius:999px;
+      background:rgba(0,0,0,.06);font-weight:800;flex-shrink:0;
+    }
+    .nav-btn.active .nav-count{background:rgba(255,255,255,.18);color:#fff}
+
+    .sidebar-spacer{flex:1}
+
+    .sidebar-footer{
+      margin-top:16px;padding:14px 16px;
+      border:1px solid var(--line);border-radius:20px;
+      background:var(--paper);
+    }
+
+    .sidebar-footer .kicker{
+      font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--muted);font-weight:800;margin-bottom:6px;
+    }
+
+    .sidebar-footer p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+
+    /* ── Main + Topbar ─────────────────────────── */
+    .main{min-width:0;display:flex;flex-direction:column}
+
+    .topbar{
+      position:sticky;top:0;z-index:10;
+      padding:16px 24px;
+      border-bottom:1px solid rgba(217,207,191,.8);
+      background:rgba(246,241,232,.82);
+      backdrop-filter: blur(12px);
+      display:flex;gap:16px;align-items:center;justify-content:space-between;
+    }
+
+    .search{
+      flex:1;max-width:480px;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 16px;border:1px solid var(--line);border-radius:999px;
+      background:var(--paper);color:var(--muted);font-size:14px;
+    }
+
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+    .chip,.btn{
+      display:inline-flex;align-items:center;gap:8px;
+      min-height:40px;padding:0 14px;border-radius:999px;
+      border:1px solid var(--line);background:var(--paper);
+      color:var(--ink);font-weight:700;font-size:13px;
+    }
+
+    .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+    /* ── Content / Views ───────────────────────── */
+    .content{padding:26px 24px 48px;flex:1}
+
+    .view{display:none}
+    .view.active{display:block}
+
+    /* ── Cards ─────────────────────────────────── */
+    .hero-card,.card{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card{padding:30px;margin-bottom:22px}
+
+    .eyebrow{
+      font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--muted);font-weight:800;margin-bottom:12px;
+    }
+
+    /* ── Hero grids ────────────────────────────── */
+    .hero-grid{
+      display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;
+    }
+
+    .hero-card h1{font-size:clamp(34px,5vw,64px);line-height:.98;margin-bottom:14px}
+    .hero-card>p,.hero-left>p{margin:0 0 18px;color:var(--muted);font-size:17px;max-width:760px}
+
+    .hero-trust{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:999px;
+      border:1px solid var(--line);background:#fff;
+      font-size:12px;font-weight:700;
+    }
+
+    .side-stack{display:grid;gap:16px}
+
+    .side-panel{
+      padding:20px;border:1px solid var(--line);
+      border-radius:22px;background:var(--card-strong);
+    }
+
+    .side-panel h3{font-size:22px;margin-bottom:8px}
+    .side-panel p{margin:0;color:var(--muted);font-size:14px}
+
+    /* ── Bento grid ────────────────────────────── */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+
+    .card{padding:22px}
+
+    .span-3{grid-column:span 3}
+    .span-4{grid-column:span 4}
+    .span-5{grid-column:span 5}
+    .span-6{grid-column:span 6}
+    .span-7{grid-column:span 7}
+    .span-8{grid-column:span 8}
+    .span-12{grid-column:span 12}
+
+    /* ── Typography helpers ────────────────────── */
+    .label{
+      font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--muted);font-weight:800;margin-bottom:12px;
+    }
+
+    .metric{
+      font-size:48px;line-height:1;letter-spacing:-.05em;font-weight:800;margin-bottom:8px;
+    }
+
+    .sub{color:var(--muted);font-size:14px}
+
+    /* ── Tags ──────────────────────────────────── */
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      font-size:12px;font-weight:800;margin-top:14px;border:1px solid transparent;
+    }
+
+    .tag.good{background:var(--soft-good);color:var(--good);border-color:#bfe4cc}
+    .tag.warn{background:var(--soft-warn);color:var(--warn);border-color:#f0d999}
+    .tag.bad {background:var(--soft-bad); color:var(--bad); border-color:#f0b8b8}
+    .tag.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+
+    /* ── Mini lists ────────────────────────────── */
+    .mini-list{display:grid;gap:10px;margin-top:14px}
+
+    .mini-row{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:11px 14px;border-radius:14px;
+      border:1px solid var(--line);background:#fff;font-size:14px;
+    }
+
+    /* ── Section heads ─────────────────────────── */
+    .section-head{
+      display:flex;justify-content:space-between;gap:14px;
+      align-items:flex-start;margin-bottom:16px;
+    }
+
+    .section-head h2{font-size:26px}
+    .section-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+    /* ── List items ────────────────────────────── */
+    .list{display:grid;gap:12px}
+
+    .list-item{
+      padding:16px;border:1px solid var(--line);
+      border-radius:18px;background:#fff;
+    }
+
+    .list-item strong{display:block;font-size:15px;margin-bottom:4px}
+    .list-item p{margin:0;color:var(--muted);font-size:14px}
+
+    .list-item .meta{
+      margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;
+    }
+
+    .meta span{
+      font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;
+      background:var(--card);border:1px solid var(--line);color:var(--muted);
+      text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    /* ── Tables ────────────────────────────────── */
+    .table{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:14px}
+
+    .table th{
+      text-align:left;font-size:11px;text-transform:uppercase;
+      letter-spacing:.16em;color:var(--muted);padding:0 12px 6px;
+    }
+
+    .table td{
+      background:#fff;border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);padding:12px;vertical-align:middle;
+    }
+
+    .table tr td:first-child{border-left:1px solid var(--line);border-radius:12px 0 0 12px}
+    .table tr td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0}
+
+    /* ── Progress bars ─────────────────────────── */
+    .bars{display:grid;gap:12px;margin-top:10px}
+    .bar-item{display:grid;gap:5px}
+    .bar-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);font-weight:700}
+    .bar{height:10px;background:#e9dfd0;border-radius:999px;overflow:hidden}
+    .bar>span{display:block;height:100%;background:#111;border-radius:999px}
+
+    /* ── Event & member grids ──────────────────── */
+    .event-grid,.member-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    }
+
+    .event-card,.member-card{
+      padding:18px;border:1px solid var(--line);
+      border-radius:20px;background:#fff;
+    }
+
+    .event-card h3,.member-card h3{font-size:20px;margin-bottom:6px}
+    .event-card p,.member-card p{margin:0;color:var(--muted);font-size:14px}
+
+    /* ── KPI row ───────────────────────────────── */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+
+    .kpi{
+      padding:16px;border:1px solid var(--line);
+      border-radius:18px;background:#fff;
+    }
+
+    .kpi strong{display:block;font-size:28px;letter-spacing:-.03em}
+    .kpi span{
+      display:block;color:var(--muted);font-size:11px;
+      text-transform:uppercase;letter-spacing:.14em;margin-top:6px;font-weight:800;
+    }
+
+    /* ── Cyber Defence hero ────────────────────── */
+    .cyber-hero{
+      display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:center;
+    }
+
+    .score-ring-wrap{display:grid;place-items:center;padding:10px 0}
+
+    .score-ring{width:200px;height:200px;position:relative}
+
+    .score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+
+    .score-center{
+      position:absolute;inset:0;
+      display:grid;place-items:center;text-align:center;
+    }
+
+    .score-center strong{font-size:48px;line-height:1;letter-spacing:-.06em}
+    .score-center span{
+      display:block;font-size:11px;text-transform:uppercase;
+      letter-spacing:.18em;color:var(--muted);font-weight:800;margin-top:6px;
+    }
+
+    .banner{
+      padding:12px 16px;border-radius:16px;
+      border:1px solid #ead8aa;background:#fff4d8;
+      color:#6f5200;font-weight:700;font-size:14px;margin-bottom:14px;
+    }
+
+    /* ── Sparkline ─────────────────────────────── */
+    .sparkline{
+      width:100%;height:110px;border-radius:16px;
+      border:1px solid var(--line);background:#fff;
+      padding:8px;display:block;
+    }
+
+    /* ── Compliance note ───────────────────────── */
+    .compliance-note{
+      padding:14px 16px;border:1px dashed var(--line);
+      border-radius:16px;color:var(--muted);font-size:13px;
+      background:rgba(255,255,255,.6);line-height:1.6;
+    }
+
+    /* ── Footer note ───────────────────────────── */
+    .footer-note{
+      margin-top:24px;color:var(--muted);font-size:13px;
+      padding:16px 18px;border:1px dashed var(--line);
+      border-radius:18px;background:rgba(255,255,255,.45);line-height:1.6;
+    }
+
+    /* ── Announcement cards ────────────────────── */
+    .announce-card{
+      padding:18px;border:1px solid var(--line);
+      border-radius:16px;background:#fff;margin-bottom:12px;
+    }
+
+    .announce-row{
+      display:flex;justify-content:space-between;align-items:flex-start;
+      gap:12px;margin-bottom:8px;
+    }
+
+    /* ── Member search ─────────────────────────── */
+    .search-input{
+      width:100%;max-width:360px;padding:10px 16px;
+      border:1px solid var(--line);border-radius:999px;
+      background:var(--paper);font-size:14px;color:var(--ink);
+      margin-bottom:20px;
+    }
+
+    /* ── Form ──────────────────────────────────── */
+    .form-row{margin-bottom:14px}
+    .form-row label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    .form-row input,.form-row textarea,.form-row select{
+      width:100%;padding:10px 14px;border:1px solid var(--line);
+      border-radius:12px;background:var(--bg);font-size:14px;font:inherit;color:var(--ink);
+    }
+    .form-row textarea{min-height:80px;resize:vertical}
+
+    /* ── Responsive ────────────────────────────── */
+    @media (max-width:1180px){
+      .hero-grid,.cyber-hero{grid-template-columns:1fr}
+      .event-grid,.member-grid,.kpi-row{grid-template-columns:repeat(2,1fr)}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 6}
+    }
+
+    @media (max-width:920px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+    }
+
+    @media (max-width:760px){
+      .content,.topbar{padding-left:16px;padding-right:16px}
+      .grid{gap:14px}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8,.span-12{grid-column:span 12}
+      .event-grid,.member-grid,.kpi-row{grid-template-columns:1fr}
+      .topbar{flex-direction:column;align-items:stretch}
+      .search{max-width:none}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ───────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">🛡</div>
+      <div class="brand-copy">
+        <strong>OpenGuardians</strong>
+        <span>Community App</span>
+      </div>
+    </div>
+
+    <div class="section-title">Workspace</div>
+    <div class="nav-list">
+      <button class="nav-btn active" data-view="home">
+        <div class="nav-left">
+          <div class="nav-icon">⌂</div>
+          <div class="nav-meta">
+            <strong>Community Home</strong>
+            <span>Overview and cross-platform status</span>
+          </div>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-view="announcements">
+        <div class="nav-left">
+          <div class="nav-icon">📣</div>
+          <div class="nav-meta">
+            <strong>Announcements</strong>
+            <span>Policy, ops, and community updates</span>
+          </div>
+        </div>
+        <div class="nav-count">3</div>
+      </button>
+
+      <button class="nav-btn" data-view="events">
+        <div class="nav-left">
+          <div class="nav-icon">🗓</div>
+          <div class="nav-meta">
+            <strong>Events</strong>
+            <span>Sessions, reviews, and briefings</span>
+          </div>
+        </div>
+        <div class="nav-count">5</div>
+      </button>
+
+      <button class="nav-btn" data-view="members">
+        <div class="nav-left">
+          <div class="nav-icon">👥</div>
+          <div class="nav-meta">
+            <strong>Member Directory</strong>
+            <span>Operators, advisors, stakeholders</span>
+          </div>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-view="help">
+        <div class="nav-left">
+          <div class="nav-icon">❖</div>
+          <div class="nav-meta">
+            <strong>Help Center</strong>
+            <span>Guides, FAQs, and support paths</span>
+          </div>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-view="requests">
+        <div class="nav-left">
+          <div class="nav-icon">✦</div>
+          <div class="nav-meta">
+            <strong>Requests</strong>
+            <span>Service intake and tracking</span>
+          </div>
+        </div>
+        <div class="nav-count">8</div>
+      </button>
+    </div>
+
+    <div class="section-title">Operations</div>
+    <div class="nav-list">
+      <button class="nav-btn" data-view="cyber">
+        <div class="nav-left">
+          <div class="nav-icon">🛡</div>
+          <div class="nav-meta">
+            <strong>Cyber Defense</strong>
+            <span>Threats, posture, control coverage</span>
+          </div>
+        </div>
+        <div class="nav-count">4</div>
+      </button>
+
+      <button class="nav-btn" data-view="admin">
+        <div class="nav-left">
+          <div class="nav-icon">⚙</div>
+          <div class="nav-meta">
+            <strong>Admin / Moderation</strong>
+            <span>Controls, approvals, and logs</span>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
+      <div class="kicker">Environment Notice</div>
+      <p>Demo environment only. Use verified scope and validated legal/compliance language before any production or client-facing deployment.</p>
+    </div>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="topbar">
+      <div class="search">⌕ Search members, updates, controls, and requests</div>
+      <div class="top-actions">
+        <div class="chip">RBAC + MFA</div>
+        <div class="chip">Audit Logging</div>
+        <div class="btn">Schedule Demo</div>
+        <div class="btn primary">Client Portal →</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── VIEW: COMMUNITY HOME ────────────────────────────── -->
+      <section class="view active" id="view-home">
+        <div class="hero-card">
+          <div class="hero-grid">
+            <div class="hero-left">
+              <div class="eyebrow">Enterprise Intelligence Platform</div>
+              <h1>Protect. Grow.<br />Sustain.</h1>
+              <p>
+                A unified intelligence platform for enterprise cybersecurity, real estate,
+                wealth management, legal operations, and trusted community coordination.
+              </p>
+              <div class="hero-trust">
+                <div class="pill">✓ RBAC + MFA</div>
+                <div class="pill">✓ Audit Logging</div>
+                <div class="pill">✓ Consent Controls</div>
+                <div class="pill">✓ Demo-Only Dataset</div>
+              </div>
+            </div>
+            <div class="side-stack">
+              <div class="side-panel">
+                <div class="label">Platform Summary</div>
+                <h3>Unified posture across every asset class.</h3>
+                <p>Cyber risk, property portfolio, wealth allocation, legal matters, and community operations in one controlled view.</p>
+              </div>
+              <div class="side-panel">
+                <div class="label">Operating Mode</div>
+                <h3>17 Dashboards</h3>
+                <p>Role-based access · live demo · compliance-first workflows</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card span-3">
+            <div class="label">Cyber Score</div>
+            <div class="metric">82</div>
+            <div class="sub">Strong posture</div>
+            <div class="tag good">▲ Stable trend</div>
+          </div>
+
+          <div class="card span-5">
+            <div class="label">Properties</div>
+            <div class="metric">6</div>
+            <div class="sub">Active portfolio</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Leased</span><strong>4</strong></div>
+              <div class="mini-row"><span>Renovation</span><strong>2</strong></div>
+            </div>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">Open Incidents</div>
+            <div class="metric">4</div>
+            <div class="sub">Active response queue</div>
+            <div class="tag warn">⚠ Escalation window open</div>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">AUM</div>
+            <div class="metric">$59.9M</div>
+            <div class="sub">↑ +8.4% YTD</div>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">Security Posture</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>MFA Coverage</span><strong>100%</strong></div>
+              <div class="mini-row"><span>RBAC Roles</span><strong>6 Active</strong></div>
+              <div class="mini-row"><span>Audit Events</span><strong>Live</strong></div>
+            </div>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">Community Status</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Members Online</span><strong>28</strong></div>
+              <div class="mini-row"><span>Upcoming Events</span><strong>5</strong></div>
+              <div class="mini-row"><span>Pending Requests</span><strong>8</strong></div>
+            </div>
+          </div>
+
+          <div class="card span-7">
+            <div class="section-head">
+              <div>
+                <h2>Recent Highlights</h2>
+                <p>Key updates across security, governance, and community activity.</p>
+              </div>
+            </div>
+            <div class="list">
+              <div class="list-item">
+                <strong>Weekly control review completed across identity and audit domains</strong>
+                <p>Posture review indicates stable MFA coverage and no unresolved permission drift in the demo environment.</p>
+                <div class="meta"><span>Security</span><span>Audit Prep</span><span>Today</span></div>
+              </div>
+              <div class="list-item">
+                <strong>Member briefing published for Q2 governance cadence</strong>
+                <p>Community-facing update aligned event planning, moderation escalation, and intake SLAs.</p>
+                <div class="meta"><span>Community</span><span>Governance</span><span>New</span></div>
+              </div>
+              <div class="list-item">
+                <strong>Portfolio overview refreshed for leadership readout</strong>
+                <p>Cross-domain summary reconciled cyber, property, and wealth views into a single executive snapshot.</p>
+                <div class="meta"><span>Executive</span><span>Reporting</span><span>Updated</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card span-5">
+            <div class="section-head">
+              <div><h2>Module Coverage</h2><p>Active demo modules.</p></div>
+            </div>
+            <div class="mini-list">
+              <div class="mini-row"><span>🛡 Cybersecurity</span><strong>Live</strong></div>
+              <div class="mini-row"><span>🏢 Real Estate</span><strong>Live</strong></div>
+              <div class="mini-row"><span>📈 Wealth Mgmt</span><strong>Live</strong></div>
+              <div class="mini-row"><span>⚖ Legal</span><strong>Live</strong></div>
+              <div class="mini-row"><span>🧾 Audit Log</span><strong>Live</strong></div>
+              <div class="mini-row"><span>📋 Compliance</span><span class="tag info" style="margin:0;padding:4px 10px;font-size:11px">Aligned</span></div>
+            </div>
+          </div>
+
+          <div class="footer-note span-12">
+            Demo environment · Replace claims with verified scope before production. Use "aligned with" or "audit prep" phrasing until compliance and certification evidence is independently validated.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: ANNOUNCEMENTS ─────────────────────────────── -->
+      <section class="view" id="view-announcements">
+        <div class="hero-card">
+          <div class="eyebrow">Announcements</div>
+          <h1 style="font-size:48px">Platform updates and community notices.</h1>
+          <p style="color:var(--muted)">Controlled communications for members, operators, and admins.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card span-8">
+            <div class="announce-card">
+              <div class="announce-row">
+                <div>
+                  <div class="meta" style="margin-bottom:8px"><span>Governance</span><span>Priority</span><span>Today</span></div>
+                  <strong style="font-size:15px">Quarterly governance review scheduled for all platform roles</strong>
+                </div>
+                <span class="tag good" style="margin:0;white-space:nowrap">Pinned</span>
+              </div>
+              <p style="color:var(--muted);font-size:14px;margin:0">The next review will cover access hygiene, moderation workflows, request handling, and audit-readiness notes. All members encouraged to review their current role assignments before the session.</p>
+            </div>
+
+            <div class="announce-card">
+              <div class="announce-row">
+                <div>
+                  <div class="meta" style="margin-bottom:8px"><span>Requests</span><span>Operations</span><span>Policy</span></div>
+                  <strong style="font-size:15px">Community intake SLA updated for service requests</strong>
+                </div>
+              </div>
+              <p style="color:var(--muted);font-size:14px;margin:0">Standard request triage remains same-day in the demo model, with escalation handled by admin moderators. Urgent items may bypass the queue with admin approval.</p>
+            </div>
+
+            <div class="announce-card">
+              <div class="announce-row">
+                <div>
+                  <div class="meta" style="margin-bottom:8px"><span>Security</span><span>Content</span><span>Updated</span></div>
+                  <strong style="font-size:15px">Cyber dashboard narrative revised for evidence-safe wording</strong>
+                </div>
+              </div>
+              <p style="color:var(--muted);font-size:14px;margin:0">Compliance language now uses "aligned with" and "audit prep" phrasing instead of unverifiable certification claims. No changes to underlying control structure.</p>
+            </div>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">Notice Types</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Operational</span><strong>4</strong></div>
+              <div class="mini-row"><span>Security</span><strong>2</strong></div>
+              <div class="mini-row"><span>Member</span><strong>3</strong></div>
+              <div class="mini-row"><span>Admin</span><strong>2</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: EVENTS ────────────────────────────────────── -->
+      <section class="view" id="view-events">
+        <div class="hero-card">
+          <div class="eyebrow">Events</div>
+          <h1 style="font-size:48px">Briefings, reviews, and community sessions.</h1>
+          <p style="color:var(--muted)">Shared operational cadence across security, members, and platform admins.</p>
+        </div>
+
+        <div class="event-grid">
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 18</span><span>Virtual</span><span>Security</span></div>
+            <h3>Cyber Posture Readout</h3>
+            <p>Threat posture review, response metrics, and control drift summary aligned with the Q2 audit prep cycle.</p>
+          </div>
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 20</span><span>Members</span><span>Onboarding</span></div>
+            <h3>Community Onboarding</h3>
+            <p>Welcome session for new members covering portal navigation, request intake, and member directory.</p>
+          </div>
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 21</span><span>Admin</span><span>Governance</span></div>
+            <h3>Admin Moderation Review</h3>
+            <p>Escalations, approvals, and service-level oversight. Access-controlled session for admin roles only.</p>
+          </div>
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 23</span><span>Portfolio</span></div>
+            <h3>Property Portfolio Sync</h3>
+            <p>Occupancy, renovation milestones, and document review cadence for the Q2 reporting period.</p>
+          </div>
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 24</span><span>Finance</span></div>
+            <h3>Wealth Reporting Preview</h3>
+            <p>Demo reporting structure for allocations, distributions, and performance summaries.</p>
+          </div>
+          <div class="event-card">
+            <div class="meta" style="margin-bottom:10px"><span>May 28</span><span>Hybrid</span><span>Policy</span></div>
+            <h3>Policy Alignment Workshop</h3>
+            <p>Community standards, privacy expectations, and change control documentation review.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: MEMBER DIRECTORY ──────────────────────────── -->
+      <section class="view" id="view-members">
+        <div class="hero-card">
+          <div class="eyebrow">Member Directory</div>
+          <h1 style="font-size:48px">Trusted operators and stakeholders.</h1>
+          <p style="color:var(--muted)">Role-aware directory for collaboration across community and platform functions.</p>
+        </div>
+
+        <input class="search-input" type="text" placeholder="Search members by name or role…" oninput="filterMembers(this.value)" />
+
+        <div class="member-grid" id="memberGrid">
+          <div class="member-card" data-name="ava morgan community operations">
+            <h3>Ava Morgan</h3>
+            <p>Community Operations Lead</p>
+            <div class="meta"><span>Moderator</span><span>Ops</span></div>
+          </div>
+          <div class="member-card" data-name="jon reyes cyber defense analyst">
+            <h3>Jon Reyes</h3>
+            <p>Cyber Defense Analyst</p>
+            <div class="meta"><span>Security</span><span>IR</span></div>
+          </div>
+          <div class="member-card" data-name="nina brooks client success">
+            <h3>Nina Brooks</h3>
+            <p>Client Success Manager</p>
+            <div class="meta"><span>Client</span><span>Support</span></div>
+          </div>
+          <div class="member-card" data-name="marcus hall portfolio operations">
+            <h3>Marcus Hall</h3>
+            <p>Portfolio Operations Advisor</p>
+            <div class="meta"><span>Property</span><span>Advisor</span></div>
+          </div>
+          <div class="member-card" data-name="elena price governance administrator">
+            <h3>Elena Price</h3>
+            <p>Governance Administrator</p>
+            <div class="meta"><span>Admin</span><span>Audit</span></div>
+          </div>
+          <div class="member-card" data-name="samir patel legal workflow">
+            <h3>Samir Patel</h3>
+            <p>Legal Workflow Coordinator</p>
+            <div class="meta"><span>Legal</span><span>Docs</span></div>
+          </div>
+          <div class="member-card" data-name="priya chen wealth management">
+            <h3>Priya Chen</h3>
+            <p>Wealth Management Analyst</p>
+            <div class="meta"><span>Finance</span><span>Reporting</span></div>
+          </div>
+          <div class="member-card" data-name="david osei risk compliance">
+            <h3>David Osei</h3>
+            <p>Risk and Compliance Officer</p>
+            <div class="meta"><span>GRC</span><span>Audit</span></div>
+          </div>
+          <div class="member-card" data-name="sarah kim platform engineer">
+            <h3>Sarah Kim</h3>
+            <p>Platform Engineer</p>
+            <div class="meta"><span>Engineering</span><span>DevSecOps</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: HELP CENTER ───────────────────────────────── -->
+      <section class="view" id="view-help">
+        <div class="hero-card">
+          <div class="eyebrow">Help Center</div>
+          <h1 style="font-size:48px">Guidance without friction.</h1>
+          <p style="color:var(--muted)">Find policies, FAQs, workflow help, and escalation paths in one place.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card span-6">
+            <div class="section-head">
+              <div><h2>Popular Guides</h2><p>Frequently used operational documentation.</p></div>
+            </div>
+            <div class="list">
+              <div class="list-item">
+                <strong>How to submit a service request</strong>
+                <p>Use the Requests view to route support, access, documentation, or governance items to the correct queue.</p>
+                <div class="meta"><span>Requests</span><span>Intake</span></div>
+              </div>
+              <div class="list-item">
+                <strong>How moderation escalation works</strong>
+                <p>Admins review flagged items, log actions with timestamps, and retain an auditable trail in the demo system.</p>
+                <div class="meta"><span>Admin</span><span>Moderation</span></div>
+              </div>
+              <div class="list-item">
+                <strong>How cyber posture is calculated</strong>
+                <p>The cyber dashboard uses demo metrics, not live telemetry. Score wording is evidence-safe and uses "aligned with" framing.</p>
+                <div class="meta"><span>Cyber</span><span>Posture</span></div>
+              </div>
+              <div class="list-item">
+                <strong>What "aligned with" means in this platform</strong>
+                <p>"Aligned with" indicates our demo controls map to the referenced framework. It does not imply external certification or third-party audit completion.</p>
+                <div class="meta"><span>Compliance</span><span>Language</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card span-6">
+            <div class="section-head">
+              <div><h2>Quick FAQs</h2><p>Fast answers for onboarding and platform use.</p></div>
+            </div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Can members see admin-only items?</span><strong>No</strong></div>
+              <div class="mini-row"><span>Are audit events retained?</span><strong>Yes</strong></div>
+              <div class="mini-row"><span>Is this production data?</span><strong>Demo Only</strong></div>
+              <div class="mini-row"><span>Are compliance claims verified?</span><strong>Not Yet</strong></div>
+              <div class="mini-row"><span>Is MFA required for all roles?</span><strong>Yes</strong></div>
+              <div class="mini-row"><span>How do I escalate an incident?</span><strong>Via Requests</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: REQUESTS ──────────────────────────────────── -->
+      <section class="view" id="view-requests">
+        <div class="hero-card">
+          <div class="eyebrow">Requests</div>
+          <h1 style="font-size:48px">Service intake with visibility.</h1>
+          <p style="color:var(--muted)">Track support, access, document, compliance, and operational requests through a clean community workflow.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card span-8">
+            <div class="section-head">
+              <div><h2>Open Queue</h2><p>Demo workflow state for member and client needs.</p></div>
+              <button class="btn primary" onclick="showRequestForm()">+ New Request</button>
+            </div>
+
+            <div id="newRequestForm" style="display:none;margin-bottom:18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card)">
+              <div class="form-row"><label>Title</label><input type="text" id="reqTitle" placeholder="Briefly describe your request…" /></div>
+              <div class="form-row"><label>Type</label>
+                <select id="reqType"><option>Support</option><option>Access</option><option>Governance</option><option>Documentation</option><option>Incident</option></select>
+              </div>
+              <div class="form-row"><label>Details</label><textarea id="reqDetails" placeholder="Provide context and any relevant links or files…"></textarea></div>
+              <div style="display:flex;gap:10px">
+                <button class="btn primary" onclick="submitRequest()">Submit Request</button>
+                <button class="btn" onclick="document.getElementById('newRequestForm').style.display='none'">Cancel</button>
+              </div>
+            </div>
+
+            <table class="table" id="requestTable">
+              <thead>
+                <tr><th>Request</th><th>Owner</th><th>Type</th><th>Status</th></tr>
+              </thead>
+              <tbody id="requestBody">
+                <tr>
+                  <td>Access review for community moderators</td>
+                  <td>Ava Morgan</td>
+                  <td>Governance</td>
+                  <td><span class="tag info" style="margin:0;padding:5px 10px;font-size:11px">In Review</span></td>
+                </tr>
+                <tr>
+                  <td>Portfolio summary export for briefing</td>
+                  <td>Marcus Hall</td>
+                  <td>Documentation</td>
+                  <td><span class="tag warn" style="margin:0;padding:5px 10px;font-size:11px">Queued</span></td>
+                </tr>
+                <tr>
+                  <td>Cyber dashboard wording update</td>
+                  <td>Jon Reyes</td>
+                  <td>Security</td>
+                  <td><span class="tag good" style="margin:0;padding:5px 10px;font-size:11px">Complete</span></td>
+                </tr>
+                <tr>
+                  <td>Legal intake packet refresh</td>
+                  <td>Samir Patel</td>
+                  <td>Documentation</td>
+                  <td><span class="tag warn" style="margin:0;padding:5px 10px;font-size:11px">In Progress</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card span-4">
+            <div class="label">Queue Summary</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Open</span><strong>8</strong></div>
+              <div class="mini-row"><span>In Progress</span><strong>3</strong></div>
+              <div class="mini-row"><span>Pending Review</span><strong>2</strong></div>
+              <div class="mini-row"><span>Completed</span><strong>14</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: CYBER DEFENSE ────────────────────────────── -->
+      <section class="view" id="view-cyber">
+        <div class="hero-card">
+          <div class="eyebrow">Cyber Defense Dashboard</div>
+          <div class="cyber-hero">
+            <div class="score-ring-wrap">
+              <div class="score-ring">
+                <svg viewBox="0 0 120 120" aria-label="Cyber score ring">
+                  <circle cx="60" cy="60" r="50" stroke="#e5d8c6" stroke-width="8" fill="none"/>
+                  <circle id="scoreArc" cx="60" cy="60" r="50" stroke="#111111" stroke-width="8"
+                    fill="none" stroke-linecap="round"
+                    stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+                </svg>
+                <div class="score-center">
+                  <strong id="scoreValue">0</strong>
+                  <span>Cyber Score</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="banner">4 open incidents in the demo queue require active monitoring and review.</div>
+              <h1 style="font-size:40px;margin-bottom:10px">Posture visibility with evidence-aware wording.</h1>
+              <p style="color:var(--muted);margin:0">
+                Control coverage, incident queue, and framework alignment are presented as illustrative demo data. Use "aligned with" and "audit prep" language until external validation is complete.
+              </p>
+              <div class="kpi-row">
+                <div class="kpi"><strong>4</strong><span>Open Incidents</span></div>
+                <div class="kpi"><strong>12m</strong><span>Median Triage</span></div>
+                <div class="kpi"><strong>96%</strong><span>Patch SLA</span></div>
+                <div class="kpi"><strong>100%</strong><span>MFA Coverage</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card span-8">
+            <div class="section-head">
+              <div><h2>90-Day Posture Trend</h2><p>Illustrative sparkline for posture movement over time.</p></div>
+            </div>
+            <svg class="sparkline" viewBox="0 0 640 110" preserveAspectRatio="none" aria-label="90 day trend">
+              <polyline fill="none" stroke="#d9cfbf" stroke-width="1" points="0,90 640,90"/>
+              <polyline fill="none" stroke="#111111" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"
+                points="10,80 70,75 120,78 180,70 230,72 290,64 340,60 400,54 460,50 520,44 580,40 630,34"/>
+              <circle cx="630" cy="34" r="4" fill="#111111"/>
+            </svg>
+          </div>
+
+          <div class="card span-4">
+            <div class="section-head">
+              <div><h2>CVE Watchlist</h2><p>Demo issues under active review.</p></div>
+            </div>
+            <div class="mini-list">
+              <div class="mini-row"><span>CVE-2026-1042</span><strong style="color:var(--bad)">Critical</strong></div>
+              <div class="mini-row"><span>CVE-2026-1188</span><strong style="color:var(--warn)">High</strong></div>
+              <div class="mini-row"><span>CVE-2026-1226</span><strong>Medium</strong></div>
+              <div class="mini-row"><span>CVE-2026-1279</span><strong style="color:var(--warn)">High</strong></div>
+            </div>
+          </div>
+
+          <div class="card span-6">
+            <div class="section-head">
+              <div>
+                <h2>NIST CSF 2.0 Coverage</h2>
+                <p>Audit prep — aligned with NIST CSF 2.0 function areas.</p>
+              </div>
+            </div>
+            <div class="bars">
+              <div class="bar-item">
+                <div class="bar-top"><span>Govern</span><span>86%</span></div>
+                <div class="bar"><span style="width:86%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Identify</span><span>84%</span></div>
+                <div class="bar"><span style="width:84%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Protect</span><span>89%</span></div>
+                <div class="bar"><span style="width:89%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Detect</span><span>77%</span></div>
+                <div class="bar"><span style="width:77%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Respond</span><span>81%</span></div>
+                <div class="bar"><span style="width:81%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Recover</span><span>73%</span></div>
+                <div class="bar"><span style="width:73%"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card span-6">
+            <div class="section-head">
+              <div><h2>Incident Watch</h2><p>Demo queue summary.</p></div>
+            </div>
+            <table class="table">
+              <thead><tr><th>Issue</th><th>Severity</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Privileged login anomaly</td><td><span class="tag bad" style="margin:0;padding:4px 10px;font-size:11px">High</span></td><td>Investigating</td></tr>
+                <tr><td>Patch backlog drift</td><td><span class="tag warn" style="margin:0;padding:4px 10px;font-size:11px">Medium</span></td><td>Queued</td></tr>
+                <tr><td>Endpoint policy exception</td><td><span class="tag warn" style="margin:0;padding:4px 10px;font-size:11px">Medium</span></td><td>Reviewing</td></tr>
+                <tr><td>Third-party alert validation</td><td><span class="tag" style="margin:0;padding:4px 10px;font-size:11px;background:var(--card);border:1px solid var(--line);color:var(--muted)">Low</span></td><td>Monitoring</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card span-12">
+            <div class="section-head">
+              <div>
+                <h2>Framework Alignment Overview</h2>
+                <p>Audit prep tracking — these represent internal posture targets, not certified compliance status.</p>
+              </div>
+            </div>
+            <div class="bars">
+              <div class="bar-item">
+                <div class="bar-top">
+                  <span>CIS Controls v8 — aligned, audit prep 88% complete</span>
+                  <span>88%</span>
+                </div>
+                <div class="bar"><span style="width:88%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top">
+                  <span>NIST CSF 2.0 — aligned, audit prep 82% complete</span>
+                  <span>82%</span>
+                </div>
+                <div class="bar"><span style="width:82%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top">
+                  <span>SOC 2 Type II — audit prep 65% complete, evidence collection in progress</span>
+                  <span>65%</span>
+                </div>
+                <div class="bar"><span style="width:65%"></span></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top">
+                  <span>ISO 27001:2022 — audit prep 58% complete, gap analysis scheduled Q3</span>
+                  <span>58%</span>
+                </div>
+                <div class="bar"><span style="width:58%"></span></div>
+              </div>
+            </div>
+            <div class="compliance-note" style="margin-top:18px">
+              <strong>Compliance disclaimer:</strong> This dashboard is a fictional demo and should not be interpreted as evidence of certification, attestation, or regulatory compliance. All framework references use "aligned with" and "audit prep" language to reflect internal control mapping — not third-party validation. Verify independently before any production, client-facing, or regulatory use.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: ADMIN / MODERATION ───────────────────────── -->
+      <section class="view" id="view-admin">
+        <div class="hero-card">
+          <div class="eyebrow">Admin / Moderation</div>
+          <h1 style="font-size:48px">Controls, approvals, and accountable operations.</h1>
+          <p style="color:var(--muted)">Admin-only view for role governance, moderation actions, and complete audit visibility.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card span-4">
+            <div class="label">Admin KPIs</div>
+            <div class="mini-list">
+              <div class="mini-row"><span>Pending approvals</span><strong>5</strong></div>
+              <div class="mini-row"><span>Flagged items</span><strong>3</strong></div>
+              <div class="mini-row"><span>Role changes today</span><strong>2</strong></div>
+              <div class="mini-row"><span>Audit events (24h)</span><strong>124</strong></div>
+            </div>
+          </div>
+
+          <div class="card span-8">
+            <div class="section-head">
+              <div><h2>Audit Trail Snapshot</h2><p>Illustrative admin activity records with full retention.</p></div>
+            </div>
+            <table class="table">
+              <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Scope</th></tr></thead>
+              <tbody>
+                <tr><td>09:12</td><td>Elena Price</td><td>Approved request</td><td>Governance queue</td></tr>
+                <tr><td>09:47</td><td>Ava Morgan</td><td>Resolved moderation flag</td><td>Community post</td></tr>
+                <tr><td>10:03</td><td>System</td><td>Logged sign-in event</td><td>Identity</td></tr>
+                <tr><td>10:44</td><td>Jon Reyes</td><td>Updated cyber narrative</td><td>Security dashboard</td></tr>
+                <tr><td>11:02</td><td>David Osei</td><td>Exported audit log</td><td>Compliance</td></tr>
+                <tr><td>11:28</td><td>Elena Price</td><td>Role assignment updated</td><td>RBAC</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card span-12">
+            <div class="section-head">
+              <div><h2>Active Member Roles</h2><p>Role assignments and status for all demo members.</p></div>
+            </div>
+            <table class="table">
+              <thead><tr><th>Member</th><th>Role</th><th>Area</th><th>Status</th><th>Last Active</th></tr></thead>
+              <tbody>
+                <tr><td>Ava Morgan</td><td>Moderator</td><td>Community Ops</td><td><span class="tag good" style="margin:0;padding:4px 10px;font-size:11px">Active</span></td><td>Today</td></tr>
+                <tr><td>Jon Reyes</td><td>Security Analyst</td><td>Cyber Defense</td><td><span class="tag good" style="margin:0;padding:4px 10px;font-size:11px">Active</span></td><td>Today</td></tr>
+                <tr><td>Elena Price</td><td>Admin</td><td>Governance</td><td><span class="tag good" style="margin:0;padding:4px 10px;font-size:11px">Active</span></td><td>Today</td></tr>
+                <tr><td>Marcus Hall</td><td>Advisor</td><td>Portfolio</td><td><span class="tag good" style="margin:0;padding:4px 10px;font-size:11px">Active</span></td><td>Yesterday</td></tr>
+                <tr><td>Samir Patel</td><td>Member</td><td>Legal</td><td><span class="tag info" style="margin:0;padding:4px 10px;font-size:11px">Pending</span></td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<script>
+/* ── Router ─────────────────────────────────────────────────── */
+const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
+const viewMap = {
+  home:'view-home', announcements:'view-announcements',
+  events:'view-events', members:'view-members',
+  help:'view-help', requests:'view-requests',
+  cyber:'view-cyber', admin:'view-admin'
+};
+
+function setView(name) {
+  navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === name));
+  Object.entries(viewMap).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', key === name);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'cyber') animateScore(82);
+}
+
+navButtons.forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
+
+/* ── Score ring animation ───────────────────────────────────── */
+function animateScore(target) {
+  const circle = document.getElementById('scoreArc');
+  const label  = document.getElementById('scoreValue');
+  if (!circle || !label) return;
+  const circumference = 2 * Math.PI * 50; // r=50
+  circle.style.strokeDasharray  = circumference.toFixed(2);
+  circle.style.strokeDashoffset = circumference.toFixed(2);
+  label.textContent = '0';
+  let current = 0;
+  function tick() {
+    current = Math.min(current + 1, target);
+    circle.style.strokeDashoffset = (circumference * (1 - current / 100)).toFixed(2);
+    label.textContent = current;
+    if (current < target) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ── Member filter ──────────────────────────────────────────── */
+function filterMembers(q) {
+  const term = q.toLowerCase();
+  document.querySelectorAll('#memberGrid .member-card').forEach(card => {
+    card.style.display = card.dataset.name.includes(term) ? '' : 'none';
+  });
+}
+
+/* ── Requests form ──────────────────────────────────────────── */
+function showRequestForm() {
+  const f = document.getElementById('newRequestForm');
+  f.style.display = f.style.display === 'none' ? '' : 'none';
+}
+
+function submitRequest() {
+  const title   = document.getElementById('reqTitle').value.trim();
+  const type    = document.getElementById('reqType').value;
+  const details = document.getElementById('reqDetails').value.trim();
+  if (!title) { alert('Please enter a request title.'); return; }
+  const tbody = document.getElementById('requestBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${title}</td>
+    <td>Demo User</td>
+    <td>${type}</td>
+    <td><span class="tag warn" style="margin:0;padding:5px 10px;font-size:11px">Queued</span></td>
+  `;
+  tbody.insertBefore(tr, tbody.firstChild);
+  document.getElementById('reqTitle').value   = '';
+  document.getElementById('reqDetails').value = '';
+  document.getElementById('newRequestForm').style.display = 'none';
+}
+
+/* ── Init ───────────────────────────────────────────────────── */
+setView('home');
+</script>
+</body>
+</html>
