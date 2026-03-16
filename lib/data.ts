@@ -1,3 +1,5 @@
+import { type LucideIcon } from "lucide-react"
+
 export type TeamMember = {
   id: string
   name: string
@@ -28,6 +30,22 @@ export type LogEntry = {
   user: string
   action: string
   type: "INFO" | "SUCCESS" | "WARNING" | "ERROR"
+}
+
+export type Transaction = {
+  id: number
+  label: string
+  amount: string
+  positive: boolean
+  date: string
+}
+
+export type Portal = {
+  title: string
+  description: string
+  badge: string
+  href: string
+  icon: LucideIcon
 }
 
 export type UserRole = "superadmin" | "admin" | "team" | "client"
@@ -89,7 +107,7 @@ export const logs: LogEntry[] = [
   { time: "2026-02-07 10:05:12", user: "client@gem.com", action: "Failed login attempt", type: "WARNING" },
 ]
 
-export const transactions = [
+export const transactions: Transaction[] = [
   { id: 1, label: "Buy GEM Digital Asset", amount: "-$5,000.00", positive: false, date: "2026-02-07 09:30" },
   { id: 2, label: "Deposit via Bank Transfer", amount: "+$10,000.00", positive: true, date: "2026-02-06 14:20" },
   { id: 3, label: "Sell ATR Real Estate Token", amount: "+$2,340.50", positive: true, date: "2026-02-05 11:15" },

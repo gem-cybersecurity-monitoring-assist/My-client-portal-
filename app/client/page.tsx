@@ -1,14 +1,42 @@
 "use client"
 
+import { memo } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
-import { transactions } from "@/lib/data"
+import { transactions, type Transaction } from "@/lib/data"
 import { Briefcase, ArrowUpRight, ArrowDownRight } from "lucide-react"
 
-// ⚡ Bolt Optimization: Move static icon out of render function.
+// ⚡ Bolt Optimization: Move static icons out of render function for stable references.
 const CLIENT_ICON = <Briefcase className="h-5 w-5 text-primary" />
+const UP_ICON = <ArrowUpRight className="h-4 w-4 text-primary" />
+const DOWN_ICON = <ArrowDownRight className="h-4 w-4 text-destructive" />
+
+/**
+ * ⚡ Bolt Optimization: Memoize individual transaction items.
+ * Prevents redundant renders of the list when other page state updates.
+ */
+const TransactionItem = memo(function TransactionItem({ tx }: { tx: Transaction }) {
+  return (
+    <div
+      className="flex items-center justify-between rounded-lg px-3 py-3 transition-colors hover:bg-surface"
+    >
+      <div className="flex items-center gap-2.5">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${tx.positive ? "bg-primary/10" : "bg-destructive/10"}`}>
+          {tx.positive ? UP_ICON : DOWN_ICON}
+        </div>
+        <span className="text-sm font-medium text-foreground">{tx.label}</span>
+      </div>
+      <div className="text-right">
+        <p className={`text-sm font-bold ${tx.positive ? "text-primary" : "text-destructive"}`}>
+          {tx.amount}
+        </p>
+        <p className="text-[11px] text-muted">{tx.date}</p>
+      </div>
+    </div>
+  )
+})
 
 export default function ClientPage() {
   const { session } = useAuth()
@@ -38,7 +66,7 @@ export default function ClientPage() {
               <p className="text-xs font-medium uppercase tracking-wider text-muted">Total Balance</p>
               <p className="mt-2 text-4xl font-extrabold text-primary md:text-5xl">$100,000.00</p>
               <div className="mt-2 flex items-center justify-center gap-1 text-sm font-bold text-primary">
-                <ArrowUpRight className="h-4 w-4" />
+                {UP_ICON}
                 +2.45% (Past 24h)
               </div>
             </div>
@@ -89,27 +117,7 @@ export default function ClientPage() {
           <h3 className="mb-4 text-base font-bold text-foreground">Recent Transactions</h3>
           <div className="space-y-1">
             {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between rounded-lg px-3 py-3 transition-colors hover:bg-surface"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${tx.positive ? "bg-primary/10" : "bg-destructive/10"}`}>
-                    {tx.positive ? (
-                      <ArrowUpRight className="h-4 w-4 text-primary" />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4 text-destructive" />
-                    )}
-                  </div>
-                  <span className="text-sm font-medium text-foreground">{tx.label}</span>
-                </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold ${tx.positive ? "text-primary" : "text-destructive"}`}>
-                    {tx.amount}
-                  </p>
-                  <p className="text-[11px] text-muted">{tx.date}</p>
-                </div>
-              </div>
+              <TransactionItem key={tx.id} tx={tx} />
             ))}
           </div>
         </GlassCard>

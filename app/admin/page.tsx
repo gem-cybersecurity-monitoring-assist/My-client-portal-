@@ -1,16 +1,33 @@
 "use client"
 
+import { memo } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { UserLookup } from "@/components/user-lookup"
-import { portfolios } from "@/lib/data"
+import { portfolios, type Portfolio } from "@/lib/data"
 import { Settings } from "lucide-react"
 
 // ⚡ Bolt Optimization: Move static JSX out of the render cycle.
 // This ensures that memoized components like PortalHeader don't re-render
 // because of a new 'icon' object reference on every parent render.
 const ADMIN_ICON = <Settings className="h-5 w-5 text-primary" />
+
+/**
+ * ⚡ Bolt Optimization: Memoize individual portfolio rows.
+ * Ensures the managed portfolios table skips reconciliation when unrelated page state changes.
+ */
+const PortfolioRow = memo(function PortfolioRow({ p }: { p: Portfolio }) {
+  return (
+    <tr className="border-b border-border/50">
+      <td className="py-3 pr-4 font-medium text-foreground">{p.client}</td>
+      <td className="py-3 pr-4 text-muted">{p.value}</td>
+      <td className={`py-3 font-semibold ${p.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>
+        {p.change}
+      </td>
+    </tr>
+  )
+})
 
 export default function AdminPage() {
   return (
@@ -50,13 +67,7 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {portfolios.map((p) => (
-                    <tr key={p.id} className="border-b border-border/50">
-                      <td className="py-3 pr-4 font-medium text-foreground">{p.client}</td>
-                      <td className="py-3 pr-4 text-muted">{p.value}</td>
-                      <td className={`py-3 font-semibold ${p.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>
-                        {p.change}
-                      </td>
-                    </tr>
+                    <PortfolioRow key={p.id} p={p} />
                   ))}
                 </tbody>
               </table>
