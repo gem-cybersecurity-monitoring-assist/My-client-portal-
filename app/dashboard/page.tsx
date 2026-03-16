@@ -1,11 +1,13 @@
 "use client"
 
+import { memo } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { StatCard } from "@/components/stat-card"
 import Link from "next/link"
+import { type Portal } from "@/lib/data"
 import {
   LayoutDashboard,
   Crown,
@@ -16,10 +18,11 @@ import {
   Shield,
 } from "lucide-react"
 
-// ⚡ Bolt Optimization: Move static icon out of render function.
+// ⚡ Bolt Optimization: Move static icons out of render function for stable references.
 const DASHBOARD_ICON = <LayoutDashboard className="h-5 w-5 text-primary" />
+const SHIELD_ICON = <Shield className="h-6 w-6 text-primary" />
 
-const portals = [
+const portals: Portal[] = [
   {
     title: "SuperAdmin Dashboard",
     description: "Tenant management, system logs, infrastructure monitoring",
@@ -57,6 +60,35 @@ const portals = [
   },
 ]
 
+/**
+ * ⚡ Bolt Optimization: Memoize individual portal cards.
+ * Improves dashboard initial render and subsequent update efficiency.
+ */
+const PortalCard = memo(function PortalCard({ portal, index }: { portal: Portal; index: number }) {
+  return (
+    <GlassCard className="flex flex-col">
+      <div style={{ animation: `fadeIn ${0.3 + index * 0.08}s ease-out` }}>
+        <div className="mb-3 flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+            <portal.icon className="h-4.5 w-4.5 text-primary" />
+          </div>
+          <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+            {portal.badge}
+          </span>
+        </div>
+        <h3 className="text-base font-bold text-foreground">{portal.title}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted">{portal.description}</p>
+        <Link
+          href={portal.href}
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-5 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {"Access Portal"}
+        </Link>
+      </div>
+    </GlassCard>
+  )
+})
+
 export default function DashboardPage() {
   const { session } = useAuth()
 
@@ -83,32 +115,13 @@ export default function DashboardPage() {
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {portals.map((portal, i) => (
-            <GlassCard key={portal.href} className="flex flex-col">
-              <div style={{ animation: `fadeIn ${0.3 + i * 0.08}s ease-out` }}>
-                <div className="mb-3 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                    <portal.icon className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                    {portal.badge}
-                  </span>
-                </div>
-                <h3 className="text-base font-bold text-foreground">{portal.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted">{portal.description}</p>
-                <Link
-                  href={portal.href}
-                  className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary px-5 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {"Access Portal"}
-                </Link>
-              </div>
-            </GlassCard>
+            <PortalCard key={portal.href} portal={portal} index={i} />
           ))}
         </div>
 
         <GlassCard hover={false} className="mt-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-            <Shield className="h-6 w-6 text-primary" />
+            {SHIELD_ICON}
           </div>
           <h3 className="text-lg font-bold text-primary">Platform Ready</h3>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
