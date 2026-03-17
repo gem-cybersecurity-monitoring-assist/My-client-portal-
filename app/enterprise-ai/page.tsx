@@ -105,9 +105,10 @@ export default function EnterpriseAIPage() {
         <GlassCard className="mt-6">
           <h3 className="mb-4 text-base font-bold text-foreground">Global Task Execution Log</h3>
           <div className="space-y-2 font-mono text-sm">
+            {/* ⚡ Bolt Optimization: Use full composite key for stable reconciliation. */}
             {aiLogs.map((log) => (
               <AILogItem
-                key={`${log.time}-${log.agent}-${log.action.substring(0, 10)}`}
+                key={`${log.time}-${log.agent}-${log.action}`}
                 log={log}
               />
             ))}

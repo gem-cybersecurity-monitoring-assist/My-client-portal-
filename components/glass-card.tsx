@@ -26,12 +26,20 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-glass-border bg-card p-5 backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300",
-        hover && "hover:-translate-y-1 hover:border-primary hover:shadow-[0_12px_40px_var(--color-glass-shadow)]",
+        "group relative rounded-xl border border-glass-border bg-card p-5 backdrop-blur-xl transition-[transform,border-color] duration-300",
+        hover && "hover:-translate-y-1 hover:border-primary",
         className
       )}
     >
-      {children}
+      {/* ⚡ Bolt Optimization: Use a pseudo-element for hover shadow to leverage GPU composition.
+          Animating opacity is significantly cheaper than animating box-shadow directly. */}
+      {hover && (
+        <div
+          className="pointer-events-none absolute inset-0 rounded-xl opacity-0 shadow-[0_12px_40px_var(--color-glass-shadow)] transition-opacity duration-300 group-hover:opacity-100"
+          aria-hidden="true"
+        />
+      )}
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }
