@@ -6,13 +6,34 @@ import { Send } from "lucide-react"
 
 type TerminalLine = { text: string; isResponse?: boolean }
 
-// ⚡ Bolt Optimization: Memoize individual terminal lines.
-// This prevents old log lines from re-rendering when typing in the command input.
+// ⚡ Bolt Optimization: Move static icon out of render function for stable references.
+const SEND_ICON = <Send className="h-4 w-4" />
+
+/**
+ * ⚡ Bolt Optimization: Memoize individual terminal lines.
+ * This prevents old log lines from re-rendering when typing in the command input.
+ */
 const TerminalLineItem = memo(function TerminalLineItem({ line }: { line: TerminalLine }) {
   return (
     <div className={line.isResponse ? "text-secondary" : "text-primary"}>
       {line.text}
     </div>
+  )
+})
+
+/**
+ * ⚡ Bolt Optimization: Memoize the entire terminal history list.
+ * This decouples the high-frequency 'command' state (typing) from the
+ * potentially large list of terminal lines. During every keystroke,
+ * React will skip the reconciliation of the entire history list.
+ */
+const TerminalHistory = memo(function TerminalHistory({ lines }: { lines: TerminalLine[] }) {
+  return (
+    <>
+      {lines.map((line, i) => (
+        <TerminalLineItem key={i} line={line} />
+      ))}
+    </>
   )
 })
 
@@ -52,9 +73,7 @@ export const TeamTerminal = memo(function TeamTerminal() {
         ref={terminalRef}
         className="h-52 overflow-y-auto rounded-lg border border-border/50 bg-[#000] p-3 font-mono text-sm md:h-64"
       >
-        {terminalLines.map((line, i) => (
-          <TerminalLineItem key={i} line={line} />
-        ))}
+        <TerminalHistory lines={terminalLines} />
       </div>
       <div className="mt-3 flex gap-2">
         <input
@@ -69,7 +88,7 @@ export const TeamTerminal = memo(function TeamTerminal() {
           onClick={sendCommand}
           className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-secondary text-primary-foreground transition-transform hover:scale-105 active:scale-95"
         >
-          <Send className="h-4 w-4" />
+          {SEND_ICON}
         </button>
       </div>
     </GlassCard>
