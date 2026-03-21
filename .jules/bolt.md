@@ -21,3 +21,7 @@
 ## 2026-02-27 - [GPU-Accelerated Animations & List Memoization]
 **Learning:** Animating properties like `box-shadow` triggers expensive paint cycles on every frame, which can lag the UI when multiple elements are animating simultaneously. Refactoring these to use `opacity` and `transform` on pseudo-elements offloads the work to the GPU compositor. Additionally, extracting list items into memoized components with stable keys is essential for maintaining performance in data-heavy dashboards.
 **Action:** Use `opacity` and `transform` for high-frequency animations. Always extract and memoize list items in dashboard views to prevent unnecessary re-renders.
+
+## 2026-03-21 - [State Colocation for Directory Isolation]
+**Learning:** While `useMemo` prevents redundant O(n) calculations, the component containing the `useMemo` still re-renders when parent state changes. Pushing the filtering state and logic down into a dedicated memoized component ensures that high-frequency sibling updates (like terminal typing) never trigger the directory's render cycle at all.
+**Action:** Colocate list-filtering state and logic into a dedicated component when that list is displayed alongside high-frequency input components.
