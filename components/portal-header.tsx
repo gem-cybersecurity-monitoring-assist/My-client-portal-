@@ -4,13 +4,20 @@ import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { LogOut, LayoutDashboard } from "lucide-react"
-import { memo } from "react"
+import { memo, useCallback } from "react"
+
+// ⚡ Bolt Optimization: Hoist static icons to constants for stable references.
+const DASHBOARD_ICON = <LayoutDashboard className="h-4 w-4" />
+const LOGOUT_ICON = <LogOut className="h-4 w-4" />
 
 /**
  * ⚡ Bolt Optimization: PortalHeader Component
  *
  * Wrapped in React.memo to skip re-renders when parent pages update.
  * Works effectively because icons and titles are now moved to static constants.
+ *
+ * Impact: Prevents unnecessary re-renders of the header by ensuring stable props
+ * and memoizing internal event handlers.
  */
 export const PortalHeader = memo(function PortalHeader({
   title,
@@ -22,10 +29,11 @@ export const PortalHeader = memo(function PortalHeader({
   const { session, logout } = useAuth()
   const router = useRouter()
 
-  const handleLogout = () => {
+  // ⚡ Bolt Optimization: Memoize logout handler for stable reference.
+  const handleLogout = useCallback(() => {
     logout()
     router.push("/login")
-  }
+  }, [logout, router])
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-glass-border bg-background/80 px-4 py-3 backdrop-blur-lg md:px-6">
@@ -43,14 +51,14 @@ export const PortalHeader = memo(function PortalHeader({
           href="/dashboard"
           className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-primary"
         >
-          <LayoutDashboard className="h-4 w-4" />
+          {DASHBOARD_ICON}
           <span className="hidden md:inline">Dashboard</span>
         </Link>
         <button
           onClick={handleLogout}
           className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-destructive"
         >
-          <LogOut className="h-4 w-4" />
+          {LOGOUT_ICON}
           <span className="hidden md:inline">Logout</span>
         </button>
       </nav>
