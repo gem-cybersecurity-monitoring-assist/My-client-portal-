@@ -13,6 +13,13 @@ const SETTINGS_ICON = <Settings className="h-4 w-4" />
 const USERS_ICON = <Users className="h-4 w-4" />
 const BRIEFCASE_ICON = <Briefcase className="h-4 w-4" />
 
+// ⚡ Bolt Optimization: Hoist static loader icon for stable element reference.
+const LOADER_ICON = (
+  <div className="flex min-h-dvh items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+)
+
 const quickAccess = [
   { label: "SuperAdmin", email: "superadmin@gem.com", pass: "super123", icon: CROWN_ICON, route: "/superadmin" },
   { label: "Admin", email: "admin@gem.com", pass: "admin123", icon: SETTINGS_ICON, route: "/admin" },
@@ -87,20 +94,8 @@ export default function Home() {
     }
   }, [login, router])
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (isAuthenticated) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+  if (isLoading || isAuthenticated) {
+    return LOADER_ICON
   }
 
   return (
