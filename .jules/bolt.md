@@ -25,3 +25,7 @@
 ## 2026-03-21 - [State Colocation for Directory Isolation]
 **Learning:** While `useMemo` prevents redundant O(n) calculations, the component containing the `useMemo` still re-renders when parent state changes. Pushing the filtering state and logic down into a dedicated memoized component ensures that high-frequency sibling updates (like terminal typing) never trigger the directory's render cycle at all.
 **Action:** Colocate list-filtering state and logic into a dedicated component when that list is displayed alongside high-frequency input components.
+
+## 2026-03-27 - [Build Artifact Hygiene & Security]
+**Learning:** Running build commands like `next build` in the sandbox generates a `.next` directory containing sensitive metadata (e.g., encryption keys) and massive binary caches. If not manually cleaned before submission or review, these can be accidentally included, causing security risks and repository bloat.
+**Action:** Always run a cleanup command (e.g., `rm -rf .next *.log`) before requesting code reviews or calling the submit tool to ensure only source changes are evaluated.
