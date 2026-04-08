@@ -2,6 +2,16 @@ import type { Metadata, Viewport } from "next"
 import { AuthProvider } from "@/lib/auth-context"
 import "./globals.css"
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+})
+
 export const metadata: Metadata = {
   title: "GEM & ATR Platform",
   description: "Enterprise Cybersecurity Monitoring & Asset Recovery Platform",
@@ -21,7 +31,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="bg-background">
-      <body className="font-sans antialiased">
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

@@ -1,12 +1,56 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { GlassCard } from "@/components/glass-card"
 import { Shield, Crown, Settings, Users, Briefcase, Loader2 } from "lucide-react"
 
+// ⚡ Bolt Optimization: Hoist static icons to constants to ensure stable references.
+const SHIELD_ICON = <Shield className="h-7 w-7 text-primary" />
+const CROWN_ICON = <Crown className="h-4 w-4" />
+const SETTINGS_ICON = <Settings className="h-4 w-4" />
+const USERS_ICON = <Users className="h-4 w-4" />
+const BRIEFCASE_ICON = <Briefcase className="h-4 w-4" />
+
+// ⚡ Bolt Optimization: Hoist static loader icon for stable element reference.
+const LOADER_ICON = (
+  <div className="flex min-h-dvh items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+)
+
 const quickAccess = [
+  { label: "SuperAdmin", email: "superadmin@gem.com", pass: "super123", icon: CROWN_ICON, route: "/superadmin" },
+  { label: "Admin", email: "admin@gem.com", pass: "admin123", icon: SETTINGS_ICON, route: "/admin" },
+  { label: "Team", email: "team@gem.com", pass: "team123", icon: USERS_ICON, route: "/team" },
+  { label: "Client", email: "client@gem.com", pass: "client123", icon: BRIEFCASE_ICON, route: "/client" },
+]
+
+// ⚡ Bolt Optimization: Memoize the Quick Access grid to prevent re-renders when typing in email/password.
+const QuickAccessButtons = memo(function QuickAccessButtons({
+  onSelect,
+  disabled,
+}: {
+  onSelect: (item: (typeof quickAccess)[0]) => void
+  disabled: boolean
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {quickAccess.map((item) => (
+        <button
+          key={item.label}
+          onClick={() => onSelect(item)}
+          disabled={disabled}
+          className="flex h-12 items-center justify-center gap-2 rounded-lg border border-glass-border bg-transparent text-sm font-semibold text-primary transition-all hover:bg-primary/10 disabled:opacity-60"
+        >
+          {item.icon}
+          {item.label}
+        </button>
+      ))}
+    </div>
+  )
+})
   { label: "SuperAdmin", email: "superadmin@gem.com", pass: "super123", icon: Crown,    route: "/superadmin" },
   { label: "Admin",      email: "admin@gem.com",      pass: "admin123", icon: Settings, route: "/admin" },
   { label: "Team",       email: "team@gem.com",        pass: "team123", icon: Users,    route: "/team" },
@@ -56,6 +100,7 @@ export default function Home() {
     }
   }
 
+  const handleQuickAccess = useCallback((item: (typeof quickAccess)[0]) => {
   const handleQuickAccess = async (item: (typeof quickAccess)[0]) => {
     setLoading(true)
     const result = await login(item.email, item.pass)
@@ -65,14 +110,10 @@ export default function Home() {
       setError(result.error ?? "Login failed.")
       setLoading(false)
     }
-  }
+  }, [login, router])
 
   if (isLoading || isAuthenticated) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return LOADER_ICON
   }
 
   return (
@@ -81,7 +122,7 @@ export default function Home() {
         <GlassCard hover={false} className="p-6 md:p-8">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-              <Shield className="h-7 w-7 text-primary" />
+              {SHIELD_ICON}
             </div>
             <h1 className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl">
               GEM & ATR
@@ -138,19 +179,7 @@ export default function Home() {
             <div className="h-px flex-1 bg-glass-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {quickAccess.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => handleQuickAccess(item)}
-                disabled={loading}
-                className="flex h-12 items-center justify-center gap-2 rounded-lg border border-glass-border bg-transparent text-sm font-semibold text-primary transition-all hover:bg-primary/10 disabled:opacity-60"
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <QuickAccessButtons onSelect={handleQuickAccess} disabled={loading} />
         </GlassCard>
       </div>
     </div>

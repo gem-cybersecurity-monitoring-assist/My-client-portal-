@@ -1,25 +1,44 @@
 "use client"
 
-import { useState } from "react"
+import { memo } from "react"
 import { AuthGuard } from "@/components/auth-guard"
 import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
+import { UserLookup } from "@/components/user-lookup"
+import { portfolios, type Portfolio } from "@/lib/data"
+import { Settings } from "lucide-react"
 import { StatusBadge } from "@/components/status-badge"
 import { portfolios, teams } from "@/lib/data"
 import { Settings, Search, ClipboardList, Users } from "lucide-react"
 import Link from "next/link"
 
-export default function AdminPage() {
-  const [search, setSearch] = useState("")
-  const filteredTeams = teams.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase())
-  )
+// ⚡ Bolt Optimization: Move static JSX out of the render cycle.
+// This ensures that memoized components like PortalHeader don't re-render
+// because of a new 'icon' object reference on every parent render.
+const ADMIN_ICON = <Settings className="h-5 w-5 text-primary" />
 
+/**
+ * ⚡ Bolt Optimization: Memoize individual portfolio rows.
+ * Ensures the managed portfolios table skips reconciliation when unrelated page state changes.
+ */
+const PortfolioRow = memo(function PortfolioRow({ p }: { p: Portfolio }) {
+  return (
+    <tr className="border-b border-border/50">
+      <td className="py-3 pr-4 font-medium text-foreground">{p.client}</td>
+      <td className="py-3 pr-4 text-muted">{p.value}</td>
+      <td className={`py-3 font-semibold ${p.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>
+        {p.change}
+      </td>
+    </tr>
+  )
+})
+
+export default function AdminPage() {
   return (
     <AuthGuard requiredRole="admin">
       <PortalHeader
         title="Admin Portal"
-        icon={<Settings className="h-5 w-5 text-primary" />}
+        icon={ADMIN_ICON}
       />
 
       <main className="mx-auto max-w-5xl px-4 py-6 md:py-10">
@@ -70,43 +89,16 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {portfolios.map((p) => (
-                    <tr key={p.id} className="border-b border-border/50">
-                      <td className="py-3 pr-4 font-medium text-foreground">{p.client}</td>
-                      <td className="py-3 pr-4 text-muted">{p.value}</td>
-                      <td className={`py-3 font-semibold ${p.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>
-                        {p.change}
-                      </td>
-                    </tr>
+                    <PortfolioRow key={p.id} p={p} />
                   ))}
                 </tbody>
               </table>
             </div>
           </GlassCard>
 
-          {/* User Lookup */}
+          {/* User Lookup - State pushed down into specialized component */}
           <GlassCard>
-            <h3 className="mb-4 text-base font-bold text-foreground">Quick User Lookup</h3>
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-11 w-full rounded-lg border border-glass-border bg-input pl-10 pr-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-              />
-            </div>
-            <div className="max-h-72 space-y-1 overflow-y-auto">
-              {filteredTeams.slice(0, 8).map((u) => (
-                <div
-                  key={u.id}
-                  className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
-                >
-                  <span className="text-sm font-medium text-foreground">{u.name}</span>
-                  <StatusBadge label={u.role} variant="default" />
-                </div>
-              ))}
-            </div>
+            <UserLookup />
           </GlassCard>
         </div>
       </main>
