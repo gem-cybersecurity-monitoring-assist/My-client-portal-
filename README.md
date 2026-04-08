@@ -29,6 +29,7 @@ A complete, enterprise-grade multi-tenant SaaS platform with 6 role-based portal
 
 -----
 
+
 ## 🎯 Quick Start
 
 ### **Option 1: Open Directly in Browser**
@@ -56,6 +57,14 @@ npx serve
 ```
 
 Then open: `http://localhost:8000`
+
+-----
+
+## 🎨 Design Modernization Plan
+
+To align the platform UI with the enterprise visual standard (deep navy gradients, glass cards, metric highlights, and compact mobile-first sections), follow the implementation guide below:
+
+- `docs/DESIGN_MODERNIZATION_RECOMMENDATIONS.md`
 
 -----
 

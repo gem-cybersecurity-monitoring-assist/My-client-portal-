@@ -7,6 +7,9 @@ import { PortalHeader } from "@/components/portal-header"
 import { GlassCard } from "@/components/glass-card"
 import { transactions, type Transaction } from "@/lib/data"
 import { Briefcase, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { transactions } from "@/lib/data"
+import { Briefcase, ArrowUpRight, ArrowDownRight, FileText } from "lucide-react"
+import Link from "next/link"
 
 // ⚡ Bolt Optimization: Move static icons out of render function for stable references.
 const CLIENT_ICON = <Briefcase className="h-5 w-5 text-primary" />
@@ -56,6 +59,17 @@ export default function ClientPage() {
           <p className="mt-1 text-sm text-muted">
             Personal Portfolio & Trading Access
           </p>
+        </div>
+
+        {/* Sub-navigation */}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link
+            href="/client/requests"
+            className="flex items-center gap-2 rounded-lg border border-glass-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <FileText className="h-4 w-4" />
+            My Requests
+          </Link>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">

@@ -11,8 +11,13 @@ import {
   type ReactNode,
 } from "react"
 import { USERS, type UserRole } from "./data"
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
+import { loginAction, logoutAction } from "@/lib/actions/auth"
+
+export type UserRole = "superadmin" | "admin" | "team" | "client"
 
 type Session = {
+  id: string
   email: string
   role: UserRole
   name: string
@@ -21,7 +26,7 @@ type Session = {
 
 type AuthContextType = {
   session: Session | null
-  login: (email: string, password: string) => boolean
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
   isAuthenticated: boolean
   isLoading: boolean
@@ -86,8 +91,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newSession))
       window.dispatchEvent(new CustomEvent("auth-update"))
       return true
+  const [session, setSession] = useState<Session | null>(null)
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("gem_session")
+      if (stored) setSession(JSON.parse(stored))
+    } catch {
+      localStorage.removeItem("gem_session")
     }
-    return false
+    setHydrated(true)
+  }, [])
+
+  const isLoading = !hydrated
+
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await loginAction(email, password)
+    if (!result.ok) return { ok: false, error: result.error }
+
+    const newSession: Session = {
+      id:        result.user.id,
+      email:     result.user.email,
+      role:      result.user.role as UserRole,
+      name:      result.user.name,
+      loginTime: new Date().toISOString(),
+    }
+    setSession(newSession)
+    localStorage.setItem("gem_session", JSON.stringify(newSession))
+    return { ok: true }
   }, [])
 
   const logout = useCallback(() => {
@@ -110,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error("useAuth must be used within AuthProvider")
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider")
+  return ctx
 }

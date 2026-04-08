@@ -125,3 +125,22 @@ export const aiLogs = [
   { time: "10:44:55", agent: "ClientConcierge", action: "Responding to inquiry #8831...", color: "warning" as const },
   { time: "10:44:50", agent: "MarketAnalyst", action: "Adjusting risk parameters...", color: "primary" as const },
 ]
+
+export type ServiceRequest = {
+  id: string
+  client: string
+  email: string
+  type: "Withdrawal" | "Deposit" | "Support" | "Account Change"
+  subject: string
+  status: "Pending" | "Approved" | "Rejected" | "In Review"
+  date: string
+  priority: "Low" | "Medium" | "High"
+}
+
+export const serviceRequests: ServiceRequest[] = [
+  { id: "REQ-001", client: "Platform Client", email: "client@gem.com", type: "Withdrawal", subject: "Withdraw $5,000 to linked bank account", status: "Pending", date: "2026-02-07", priority: "High" },
+  { id: "REQ-002", client: "Platform Client", email: "client@gem.com", type: "Support", subject: "Portfolio balance discrepancy on dashboard", status: "In Review", date: "2026-02-06", priority: "Medium" },
+  { id: "REQ-003", client: "John Doe", email: "johndoe@example.com", type: "Account Change", subject: "Update beneficiary information", status: "Approved", date: "2026-02-05", priority: "Low" },
+  { id: "REQ-004", client: "Alice Smith", email: "alice@example.com", type: "Deposit", subject: "Wire transfer confirmation needed", status: "Pending", date: "2026-02-07", priority: "Medium" },
+  { id: "REQ-005", client: "Bob Johnson", email: "bob@example.com", type: "Withdrawal", subject: "Quarterly withdrawal — $12,000", status: "Rejected", date: "2026-02-04", priority: "High" },
+]

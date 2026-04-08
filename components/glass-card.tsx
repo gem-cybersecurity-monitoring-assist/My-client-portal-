@@ -28,6 +28,8 @@ export function GlassCard({
       className={cn(
         "group relative rounded-xl border border-glass-border bg-card p-5 backdrop-blur-xl transition-[transform,border-color] duration-300",
         hover && "hover:-translate-y-1 hover:border-primary",
+        "rounded-xl border border-glass-border bg-card p-5 transition-colors duration-200",
+        hover && "hover:border-primary hover:shadow-[0_8px_24px_var(--color-glass-shadow)]",
         className
       )}
     >
